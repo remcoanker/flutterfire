@@ -294,7 +294,7 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
                     didReceiveRemoteNotificationWithCompletionSEL,
                     method_getImplementation(donorMethod), method_getTypeEncoding(donorMethod));
   }
-#else
+#if !TARGET_OS_OSX
   // `[_registrar addApplicationDelegate:self];` alone doesn't work for notifications to be received
   // without the above swizzling This commit:
   // https://github.com/google/GoogleUtilities/pull/162/files#diff-6bb6d1c46632fc66405a524071cc4baca5fc6a1a6c0eefef81d8c3e2c89cbc13L520-L533
