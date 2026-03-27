@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'cloud_functions/cloud_functions_e2e_test.dart' as cloud_functions;
+import 'firebase_ai/firebase_ai_e2e_test.dart' as firebase_ai;
 import 'firebase_analytics/firebase_analytics_e2e_test.dart'
     as firebase_analytics;
 import 'firebase_app_check/firebase_app_check_e2e_test.dart'
@@ -18,8 +19,6 @@ import 'firebase_core/firebase_core_e2e_test.dart' as firebase_core;
 import 'firebase_crashlytics/firebase_crashlytics_e2e_test.dart'
     as firebase_crashlytics;
 import 'firebase_database/firebase_database_e2e_test.dart' as firebase_database;
-import 'firebase_dynamic_links/firebase_dynamic_links_e2e_test.dart'
-    as firebase_dynamic_links;
 import 'firebase_messaging/firebase_messaging_e2e_test.dart'
     as firebase_messaging;
 import 'firebase_ml_model_downloader/firebase_ml_model_downloader_e2e_test.dart'
@@ -53,13 +52,13 @@ void main() {
     }
     if (kIsWeb) {
       firebase_core.main();
+      firebase_ai.main();
       firebase_auth.main();
       firebase_database.main();
       firebase_crashlytics.main();
       firebase_analytics.main();
       cloud_functions.main();
       firebase_app_installations.main();
-      firebase_dynamic_links.main();
       firebase_messaging.main();
       firebase_ml_model_downloader.main();
       firebase_performance.main();
@@ -77,6 +76,7 @@ void main() {
       case TargetPlatform.windows:
         firebase_core.main();
         firebase_auth.main();
+        firebase_remote_config.main();
         firebase_storage.main();
         break;
       default:
@@ -89,13 +89,13 @@ void main() {
 
 void runAllTests() {
   firebase_core.main();
+  firebase_ai.main();
   firebase_auth.main();
   firebase_database.main();
   firebase_crashlytics.main();
   firebase_analytics.main();
   cloud_functions.main();
   firebase_app_installations.main();
-  firebase_dynamic_links.main();
   firebase_messaging.main();
   firebase_ml_model_downloader.main();
   firebase_performance.main();

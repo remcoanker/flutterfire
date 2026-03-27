@@ -27,7 +27,7 @@ external FirestoreJsImpl initializeFirestore(
 @staticInterop
 
 /// Type DocumentReferenceJsImpl
-external JSPromise addDoc(
+external JSPromise<DocumentReferenceJsImpl> addDoc(
   CollectionReferenceJsImpl reference,
   JSAny data,
 );
@@ -113,16 +113,6 @@ external FieldPath documentId();
 
 @JS()
 @staticInterop
-@Deprecated(
-  'This function will be removed in a future major release. Instead, set FirestoreSettings.localCache to an instance of PersistentLocalCache to turn on IndexedDb cache.',
-)
-external JSPromise enableIndexedDbPersistence(
-  FirestoreJsImpl firestore, [
-  PersistenceSettings? settings,
-]);
-
-@JS()
-@staticInterop
 external JSPromise enableMultiTabIndexedDbPersistence(
   FirestoreJsImpl firestore,
 );
@@ -133,37 +123,37 @@ external JSPromise enableNetwork(FirestoreJsImpl firestore);
 
 @JS()
 @staticInterop
-external JSPromise getDoc(
+external JSPromise<DocumentSnapshotJsImpl> getDoc(
   DocumentReferenceJsImpl reference,
 );
 
 @JS()
 @staticInterop
-external JSPromise getDocFromCache(
+external JSPromise<DocumentSnapshotJsImpl> getDocFromCache(
   DocumentReferenceJsImpl reference,
 );
 
 @JS()
 @staticInterop
-external JSPromise getDocFromServer(
+external JSPromise<DocumentSnapshotJsImpl> getDocFromServer(
   DocumentReferenceJsImpl reference,
 );
 
 @JS()
 @staticInterop
-external JSPromise getDocs(
+external JSPromise<QuerySnapshotJsImpl> getDocs(
   QueryJsImpl query,
 );
 
 @JS()
 @staticInterop
-external JSPromise getDocsFromCache(
+external JSPromise<QuerySnapshotJsImpl> getDocsFromCache(
   QueryJsImpl query,
 );
 
 @JS()
 @staticInterop
-external JSPromise getDocsFromServer(
+external JSPromise<QuerySnapshotJsImpl> getDocsFromServer(
   QueryJsImpl query,
 );
 
@@ -244,9 +234,7 @@ external PersistentSingleTabManager persistentSingleTabManager(
 
 @JS()
 @staticInterop
-external PersistentMultipleTabManager persistentMultipleTabManager(
-  PersistentSingleTabManagerSettings? settings,
-);
+external PersistentMultipleTabManager persistentMultipleTabManager();
 
 @JS()
 @staticInterop
@@ -354,11 +342,7 @@ extension FirestoreJsImplExtension on FirestoreJsImpl {
   external JSString get type;
 }
 
-@JS('WriteBatch')
-@staticInterop
-abstract class WriteBatchJsImpl {}
-
-extension WriteBatchJsImplExtension on WriteBatchJsImpl {
+extension type WriteBatchJsImpl._(JSObject _) implements JSObject {
   external JSPromise commit();
 
   external WriteBatchJsImpl delete(DocumentReferenceJsImpl documentRef);
@@ -373,13 +357,7 @@ extension WriteBatchJsImplExtension on WriteBatchJsImpl {
   );
 }
 
-@JS('CollectionReference')
-@staticInterop
-class CollectionReferenceJsImpl extends QueryJsImpl {
-  external factory CollectionReferenceJsImpl();
-}
-
-extension CollectionReferenceJsImplExtension on CollectionReferenceJsImpl {
+extension type CollectionReferenceJsImpl._(JSObject _) implements QueryJsImpl {
   external JSString get id;
   external DocumentReferenceJsImpl get parent;
   external JSString get path;
@@ -440,11 +418,7 @@ extension GeoPointJsImplExtension on GeoPointJsImpl {
 @staticInterop
 external VectorValueJsImpl get VectorValueConstructor;
 
-@JS('VectorValue')
-@staticInterop
-class VectorValueJsImpl {}
-
-extension VectorValueJsImplExtension on VectorValueJsImpl {
+extension type VectorValueJsImpl._(JSObject _) implements JSObject {
   external JSArray toArray();
 }
 
@@ -474,12 +448,7 @@ extension BytesJsImplExtension on BytesJsImpl {
   external JSBoolean isEqual(JSObject other);
 }
 
-@anonymous
-@JS()
-@staticInterop
-abstract class DocumentChangeJsImpl {}
-
-extension DocumentChangeJsImplExtension on DocumentChangeJsImpl {
+extension type DocumentChangeJsImpl._(JSObject _) implements JSObject {
   external JSString /*'added'|'removed'|'modified'*/ get type;
 
   external set type(JSString /*'added'|'removed'|'modified'*/ v);
@@ -501,11 +470,7 @@ extension DocumentChangeJsImplExtension on DocumentChangeJsImpl {
 @staticInterop
 external DocumentReferenceJsImpl get DocumentReferenceJsConstructor;
 
-@JS('DocumentReference')
-@staticInterop
-abstract class DocumentReferenceJsImpl {}
-
-extension DocumentReferenceJsImplExtension on DocumentReferenceJsImpl {
+extension type DocumentReferenceJsImpl._(JSObject _) implements JSObject {
   external FirestoreJsImpl get firestore;
   external JSString get id;
   external CollectionReferenceJsImpl get parent;
@@ -521,11 +486,7 @@ extension QueryConstraintJsImplExtension on QueryConstraintJsImpl {
   external JSString get type;
 }
 
-@JS('LoadBundleTask')
-@staticInterop
-abstract class LoadBundleTaskJsImpl {}
-
-extension LoadBundleTaskJsImplExtension on LoadBundleTaskJsImpl {
+extension type LoadBundleTaskJsImpl._(JSObject _) implements JSObject {
   external void onProgress(
     JSFunction? next,
   );
@@ -536,13 +497,7 @@ extension LoadBundleTaskJsImplExtension on LoadBundleTaskJsImpl {
   ]);
 }
 
-@JS()
-@staticInterop
-@anonymous
-abstract class LoadBundleTaskProgressJsImpl {}
-
-extension LoadBundleTaskProgressJsImplExtension
-    on LoadBundleTaskProgressJsImpl {
+extension type LoadBundleTaskProgressJsImpl._(JSObject _) implements JSObject {
 // int or String?
   external JSAny get bytesLoaded;
 
@@ -556,11 +511,7 @@ extension LoadBundleTaskProgressJsImplExtension
   external JSNumber get totalDocuments;
 }
 
-@JS('DocumentSnapshot')
-@staticInterop
-abstract class DocumentSnapshotJsImpl {}
-
-extension DocumentSnapshotJsImplExtension on DocumentSnapshotJsImpl {
+extension type DocumentSnapshotJsImpl._(JSObject _) implements JSObject {
   external JSString get id;
   external SnapshotMetadata get metadata;
   external DocumentReferenceJsImpl get ref;
@@ -574,12 +525,7 @@ extension DocumentSnapshotJsImplExtension on DocumentSnapshotJsImpl {
 /// [set()] or [update()].
 ///
 /// See: <https://firebase.google.com/docs/reference/js/firebase.firestore.FieldValue>.
-@JS()
-@staticInterop
-@anonymous
-abstract class FieldValue {}
-
-extension FieldValueExtension on FieldValue {
+extension type FieldValue._(JSObject _) implements JSObject {
   /// Returns `true` if this [FieldValue] is equal to the provided [other].
   external JSBoolean isEqual(FieldValue other);
 }
@@ -589,20 +535,12 @@ extension FieldValueExtension on FieldValue {
 @staticInterop
 external JSObject get fieldValues;
 
-@JS('Query')
-@staticInterop
-abstract class QueryJsImpl {}
-
-extension QueryJsImplExtension on QueryJsImpl {
+extension type QueryJsImpl._(JSObject _) implements JSObject {
   external FirestoreJsImpl get firestore;
   external JSString get type;
 }
 
-@JS('QuerySnapshot')
-@staticInterop
-abstract class QuerySnapshotJsImpl {}
-
-extension QuerySnapshotJsImplExtension on QuerySnapshotJsImpl {
+extension type QuerySnapshotJsImpl._(JSObject _) implements JSObject {
   external JSArray get docs;
   external JSBoolean get empty;
   external SnapshotMetadata get metadata;
@@ -617,11 +555,7 @@ extension QuerySnapshotJsImplExtension on QuerySnapshotJsImpl {
   ]);
 }
 
-@JS('Transaction')
-@staticInterop
-abstract class TransactionJsImpl {}
-
-extension TransactionJsImplExtension on TransactionJsImpl {
+extension type TransactionJsImpl._(JSObject _) implements JSObject {
   external TransactionJsImpl delete(DocumentReferenceJsImpl documentRef);
 
   external JSPromise get(DocumentReferenceJsImpl documentRef);
@@ -743,10 +677,6 @@ abstract class FirestoreSettings {
 }
 
 extension FirestoreSettingsExtension on FirestoreSettings {
-  @Deprecated('Use FirestoreSettings.localCache instead.')
-  //ignore: avoid_setters_without_getters
-  external set cacheSizeBytes(JSNumber i);
-
   //ignore: avoid_setters_without_getters
   external set host(JSString h);
 
@@ -810,53 +740,28 @@ abstract class FirestoreLocalCache {}
 ///
 /// To use, create an instance using the factory function , then set the instance to FirestoreSettings.cache
 /// and call initializeFirestore using the settings object.
-@anonymous
-@JS()
-@staticInterop
-abstract class MemoryLocalCache extends FirestoreLocalCache {}
-
-extension MemoryLocalCacheExtension on MemoryLocalCache {
+extension type MemoryLocalCache._(JSObject _) implements JSObject {
   external JSString get kind;
 }
 
 /// A tab manager supporting only one tab, no synchronization will be performed across tabs.
-@anonymous
-@JS()
-@staticInterop
-abstract class PersistentSingleTabManager {}
-
-extension PersistentSingleTabManagerExtension on PersistentSingleTabManager {
+extension type PersistentSingleTabManager._(JSObject _) implements JSObject {
   external JSString get kind;
 }
 
 /// A tab manager supporting multiple tabs. SDK will synchronize queries and mutations done across all tabs using the SDK.
-@anonymous
-@JS()
-@staticInterop
-abstract class PersistentMultipleTabManager {}
-
-extension PersistentMultipleTabManagerExtension
-    on PersistentMultipleTabManager {
+extension type PersistentMultipleTabManager._(JSObject _) implements JSObject {
   external JSString get kind;
 }
 
 /// A garbage collector deletes documents whenever they are not part of any active queries, and have no local mutations attached to them.
-@anonymous
-@JS()
-@staticInterop
-abstract class MemoryEagerGarbageCollector {}
-
-extension MemoryEagerGarbageCollectorExtension on MemoryEagerGarbageCollector {
+///
+extension type MemoryEagerGarbageCollector._(JSObject _) implements JSObject {
   external JSString get kind;
 }
 
 /// A garbage collector deletes Least-Recently-Used documents in multiple batches.
-@anonymous
-@JS()
-@staticInterop
-abstract class MemoryLruGarbageCollector {}
-
-extension MemoryLruGarbageCollectorExtension on MemoryLruGarbageCollector {
+extension type MemoryLruGarbageCollector._(JSObject _) implements JSObject {
   external JSString get kind;
 }
 
@@ -864,12 +769,7 @@ extension MemoryLruGarbageCollectorExtension on MemoryLruGarbageCollector {
 ///
 /// To use, create an instance using the factory function , then set the instance to FirestoreSettings.cache
 /// and call initializeFirestore using the settings object.
-@anonymous
-@JS()
-@staticInterop
-abstract class PersistentLocalCache extends FirestoreLocalCache {}
-
-extension PersistentLocalCacheExtension on PersistentLocalCache {
+extension type PersistentLocalCache._(JSObject _) implements JSObject {
   external JSString get kind;
 }
 
@@ -923,12 +823,17 @@ extension PersistentCacheSettingsExtension on PersistentCacheSettings {
   external set tabManager(JSObject v);
 }
 
-/// An settings object to configure an PersistentLocalCache instance.
+/// Settings to configure a PersistentSingleTabManager instance.
 ///
 /// See: <https://firebase.google.com/docs/reference/js/firestore_.persistentsingletabmanagersettings>.
+@anonymous
 @JS()
 @staticInterop
-abstract class PersistentSingleTabManagerSettings {}
+abstract class PersistentSingleTabManagerSettings {
+  external factory PersistentSingleTabManagerSettings({
+    JSBoolean? forceOwnership,
+  });
+}
 
 extension PersistentSingleTabManagerSettingsExtension
     on PersistentSingleTabManagerSettings {
@@ -945,11 +850,7 @@ extension PersistentSingleTabManagerSettingsExtension
 /// Metadata about a snapshot, describing the state of the snapshot.
 ///
 /// See: <https://firebase.google.com/docs/reference/js/firebase.firestore.SnapshotMetadata>.
-@JS()
-@staticInterop
-abstract class SnapshotMetadata {}
-
-extension SnapshotMetadataExtension on SnapshotMetadata {
+extension type SnapshotMetadata._(JSObject _) implements JSObject {
   /// [:true:] if the snapshot includes local writes (set() or update() calls)
   /// that haven't been committed to the backend yet. If your listener has opted
   /// into metadata updates via onDocumentMetadataSnapshot,
@@ -1105,12 +1006,7 @@ external JSPromise getAggregateFromServer(
   JSObject specs,
 );
 
-@JS('AggregateQuerySnapshot')
-@staticInterop
-abstract class AggregateQuerySnapshotJsImpl {}
-
-extension AggregateQuerySnapshotJsImplExtension
-    on AggregateQuerySnapshotJsImpl {
+extension type AggregateQuerySnapshotJsImpl._(JSObject _) implements JSObject {
   external JSObject data();
 }
 

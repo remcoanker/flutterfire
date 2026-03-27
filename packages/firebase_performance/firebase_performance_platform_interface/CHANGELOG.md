@@ -1,3 +1,43 @@
+## 0.1.6+6
+
+ - **REFACTOR**: fix formatting and analysis issues across the repo ([#18124](https://github.com/firebase/flutterfire/issues/18124)). ([ab79fd93](https://github.com/firebase/flutterfire/commit/ab79fd93ee4ccfeb478687623134b1cf8ab71c74))
+
+## 0.1.6+5
+
+ - Update a dependency to the latest release.
+
+## 0.1.6+4
+
+ - Update a dependency to the latest release.
+
+## 0.1.6+3
+
+ - Update a dependency to the latest release.
+
+## 0.1.6+2
+
+ - Update a dependency to the latest release.
+
+## 0.1.6+1
+
+ - Update a dependency to the latest release.
+
+## 0.1.6
+
+ - **FEAT**(performance): add support for Pigeon. Update iOS to Swift and Android to Kotlin ([#17676](https://github.com/firebase/flutterfire/issues/17676)). ([9c2ab08a](https://github.com/firebase/flutterfire/commit/9c2ab08a41edd1ddb2e08aaf19d17fe85f64a7d7))
+
+## 0.1.5+12
+
+ - Update a dependency to the latest release.
+
+## 0.1.5+11
+
+ - Update a dependency to the latest release.
+
+## 0.1.5+10
+
+ - Update a dependency to the latest release.
+
 ## 0.1.5+9
 
  - Update a dependency to the latest release.

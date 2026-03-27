@@ -1,3 +1,46 @@
+## 5.1.4
+
+ - Update a dependency to the latest release.
+
+## 5.1.3
+
+ - Update a dependency to the latest release.
+
+## 5.1.2
+
+ - Update a dependency to the latest release.
+
+## 5.1.1
+
+ - Update a dependency to the latest release.
+
+## 5.1.0
+
+ - **REFACTOR**(functions,web): convert classes to extension types for improved interop ([#17825](https://github.com/firebase/flutterfire/issues/17825)). ([d63c0342](https://github.com/firebase/flutterfire/commit/d63c034266f7c8644981cdc922fcd374a16ed33a))
+ - **FEAT**(web): add `registerVersion` support for packages ([#17780](https://github.com/firebase/flutterfire/issues/17780)). ([3c8c83d4](https://github.com/firebase/flutterfire/commit/3c8c83d4251f2965ae6fb1fe7b64c21dcb94e9ec))
+
+## 5.0.3
+
+ - Update a dependency to the latest release.
+
+## 5.0.2
+
+ - Update a dependency to the latest release.
+
+## 5.0.1
+
+ - Update a dependency to the latest release.
+
+## 5.0.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**: bump iOS SDK to version 12.0.0 ([#17549](https://github.com/firebase/flutterfire/issues/17549)). ([b2619e68](https://github.com/firebase/flutterfire/commit/b2619e685fec897513483df1d7be347b64f95606))
+
+## 4.11.5
+
+ - Update a dependency to the latest release.
+
 ## 4.11.4
 
  - Update a dependency to the latest release.

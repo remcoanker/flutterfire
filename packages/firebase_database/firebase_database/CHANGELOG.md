@@ -1,3 +1,59 @@
+## 12.2.0
+
+ - **FIX**(database,iOS): remove unnecessary order modifier checks in query construction ([#18134](https://github.com/firebase/flutterfire/issues/18134)). ([4fa10c36](https://github.com/firebase/flutterfire/commit/4fa10c36d195d4cd67c39d89984cfe5a1eee5d85))
+ - **FIX**(android): remove kotlin-android since AGP 9 supports it ([#18059](https://github.com/firebase/flutterfire/issues/18059)). ([1e39ad1f](https://github.com/firebase/flutterfire/commit/1e39ad1f146ce23742731ceeb30ff36c440b816f))
+ - **FEAT**(database,windows): add support for Realtime Database to windows ([#18079](https://github.com/firebase/flutterfire/issues/18079)). ([007689f9](https://github.com/firebase/flutterfire/commit/007689f99866582828a063d174c52ebba13ac0ef))
+ - **FEAT**(ios): migrate iOS to UIScene lifecycle ([#18054](https://github.com/firebase/flutterfire/issues/18054)). ([3ffa4110](https://github.com/firebase/flutterfire/commit/3ffa411098132fd5182a84be4e7a226106bc7451))
+
+## 12.1.4
+
+ - Update a dependency to the latest release.
+
+## 12.1.3
+
+ - **FIX**(firebase_database): Add modifiers to keepSynced ref in android ([#17978](https://github.com/firebase/flutterfire/issues/17978)). ([8b1e05f6](https://github.com/firebase/flutterfire/commit/8b1e05f69544f22eaac568ea217cdce1299ded47))
+
+## 12.1.2
+
+ - **FIX**(database,iOS): ensure transaction handler calls are executed on the main thread ([#17953](https://github.com/firebase/flutterfire/issues/17953)). ([5f8c8e87](https://github.com/firebase/flutterfire/commit/5f8c8e874fcf5689a01830a5569fdad234637c1e))
+
+## 12.1.1
+
+ - **FIX**(database,android): improve type handling for startAt query modifier and add test for numeric startAt ([#17880](https://github.com/firebase/flutterfire/issues/17880)). ([bbb2895c](https://github.com/firebase/flutterfire/commit/bbb2895cc7d47ebb081b4fd8db186d0e8408da49))
+ - **FIX**(database,Android): resolve limit modifier type casting ([#17867](https://github.com/firebase/flutterfire/issues/17867)). ([20152819](https://github.com/firebase/flutterfire/commit/20152819c6cd5d648718f266f80adeeb79fa5e97))
+ - **FIX**(database): properly dispose event channel stream handler ([#17864](https://github.com/firebase/flutterfire/issues/17864)). ([0f9c4450](https://github.com/firebase/flutterfire/commit/0f9c44501cbcdb89963fd292fe595b24b83fdfe0))
+
+## 12.1.0
+
+ - **FEAT**(database): add support for Pigeon. Update iOS to Swift and Android to Kotlin ([#17686](https://github.com/firebase/flutterfire/issues/17686)). ([dac0b0bd](https://github.com/firebase/flutterfire/commit/dac0b0bd033b1c51446aedf0413740ef426877b8))
+
+## 12.0.4
+
+ - Update a dependency to the latest release.
+
+## 12.0.3
+
+ - Update a dependency to the latest release.
+
+## 12.0.2
+
+ - Update a dependency to the latest release.
+
+## 12.0.1
+
+ - Update a dependency to the latest release.
+
+## 12.0.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**: bump iOS SDK to version 12.0.0 ([#17549](https://github.com/firebase/flutterfire/issues/17549)). ([b2619e68](https://github.com/firebase/flutterfire/commit/b2619e685fec897513483df1d7be347b64f95606))
+ - **BREAKING** **FEAT**: bump Android SDK to version 34.0.0 ([#17554](https://github.com/firebase/flutterfire/issues/17554)). ([a5bdc051](https://github.com/firebase/flutterfire/commit/a5bdc051d40ee44e39cf0b8d2a7801bc6f618b67))
+
+## 11.3.10
+
+ - Update a dependency to the latest release.
+
 ## 11.3.9
 
  - Update a dependency to the latest release.

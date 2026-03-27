@@ -37,17 +37,17 @@ final class GenerativeModel extends BaseApiClientModel {
     required String location,
     required FirebaseApp app,
     required bool useVertexBackend,
+    bool? useLimitedUseAppCheckTokens,
     FirebaseAppCheck? appCheck,
     FirebaseAuth? auth,
     List<SafetySetting>? safetySettings,
     GenerationConfig? generationConfig,
-    List<Tool>? tools,
+    this.tools,
     ToolConfig? toolConfig,
     Content? systemInstruction,
     http.Client? httpClient,
   })  : _safetySettings = safetySettings ?? [],
         _generationConfig = generationConfig,
-        _tools = tools,
         _toolConfig = toolConfig,
         _systemInstruction = systemInstruction,
         super(
@@ -60,24 +60,25 @@ final class GenerativeModel extends BaseApiClientModel {
             client: HttpApiClient(
                 apiKey: app.options.apiKey,
                 httpClient: httpClient,
-                requestHeaders: BaseModel.firebaseTokens(appCheck, auth, app)));
+                requestHeaders: BaseModel.firebaseTokens(
+                    appCheck, auth, app, useLimitedUseAppCheckTokens)));
 
   GenerativeModel._constructTestModel({
     required String model,
     required String location,
     required FirebaseApp app,
     required useVertexBackend,
+    bool? useLimitedUseAppCheckTokens,
     FirebaseAppCheck? appCheck,
     FirebaseAuth? auth,
     List<SafetySetting>? safetySettings,
     GenerationConfig? generationConfig,
-    List<Tool>? tools,
+    this.tools,
     ToolConfig? toolConfig,
     Content? systemInstruction,
     ApiClient? apiClient,
   })  : _safetySettings = safetySettings ?? [],
         _generationConfig = generationConfig,
-        _tools = tools,
         _toolConfig = toolConfig,
         _systemInstruction = systemInstruction,
         super(
@@ -90,12 +91,14 @@ final class GenerativeModel extends BaseApiClientModel {
             client: apiClient ??
                 HttpApiClient(
                     apiKey: app.options.apiKey,
-                    requestHeaders:
-                        BaseModel.firebaseTokens(appCheck, auth, app)));
+                    requestHeaders: BaseModel.firebaseTokens(
+                        appCheck, auth, app, useLimitedUseAppCheckTokens)));
 
   final List<SafetySetting> _safetySettings;
   final GenerationConfig? _generationConfig;
-  final List<Tool>? _tools;
+
+  /// List of [Tool] registered in the model
+  final List<Tool>? tools;
 
   final ToolConfig? _toolConfig;
   final Content? _systemInstruction;
@@ -122,7 +125,7 @@ final class GenerativeModel extends BaseApiClientModel {
             model,
             safetySettings ?? _safetySettings,
             generationConfig ?? _generationConfig,
-            tools ?? _tools,
+            tools ?? this.tools,
             toolConfig ?? _toolConfig,
             _systemInstruction,
           ),
@@ -153,7 +156,7 @@ final class GenerativeModel extends BaseApiClientModel {
           model,
           safetySettings ?? _safetySettings,
           generationConfig ?? _generationConfig,
-          tools ?? _tools,
+          tools ?? this.tools,
           toolConfig ?? _toolConfig,
           _systemInstruction,
         ));
@@ -185,7 +188,7 @@ final class GenerativeModel extends BaseApiClientModel {
       model,
       _safetySettings,
       _generationConfig,
-      _tools,
+      tools,
       _toolConfig,
     );
     return makeRequest(Task.countTokens, parameters,
@@ -199,6 +202,7 @@ GenerativeModel createGenerativeModel({
   required String location,
   required String model,
   required bool useVertexBackend,
+  bool? useLimitedUseAppCheckTokens,
   FirebaseAppCheck? appCheck,
   FirebaseAuth? auth,
   GenerationConfig? generationConfig,
@@ -212,6 +216,7 @@ GenerativeModel createGenerativeModel({
       app: app,
       appCheck: appCheck,
       useVertexBackend: useVertexBackend,
+      useLimitedUseAppCheckTokens: useLimitedUseAppCheckTokens,
       auth: auth,
       location: location,
       safetySettings: safetySettings,
@@ -230,6 +235,7 @@ GenerativeModel createModelWithClient({
   required String model,
   required ApiClient client,
   required bool useVertexBackend,
+  bool? useLimitedUseAppCheckTokens,
   Content? systemInstruction,
   FirebaseAppCheck? appCheck,
   FirebaseAuth? auth,
@@ -243,6 +249,7 @@ GenerativeModel createModelWithClient({
         app: app,
         appCheck: appCheck,
         useVertexBackend: useVertexBackend,
+        useLimitedUseAppCheckTokens: useLimitedUseAppCheckTokens,
         auth: auth,
         location: location,
         safetySettings: safetySettings,

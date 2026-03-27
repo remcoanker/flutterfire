@@ -19,7 +19,7 @@ void main() {
   group('VertexAI Exceptions', () {
     test('VertexAIException toString', () {
       final exception = FirebaseAIException('Test message');
-      expect(exception.toString(), 'VertexAIException: Test message');
+      expect(exception.toString(), 'FirebaseAIException: Test message');
     });
 
     test('InvalidApiKey toString', () {
@@ -40,7 +40,7 @@ void main() {
           'The Vertex AI in Firebase SDK requires the Vertex AI in Firebase API '
           '(`firebasevertexai.googleapis.com`) to be enabled in your Firebase project. Enable this API '
           'by visiting the Firebase Console at '
-          'https://console.firebase.google.com/project/test-project/genai '
+          'https://console.firebase.google.com/project/test-project/ailogic '
           'and clicking "Get started". If you enabled this API recently, wait a few minutes for the '
           'action to propagate to our systems and then retry.');
     });
@@ -55,12 +55,12 @@ void main() {
       expect(exception.toString(), 'Server error occurred.');
     });
 
-    test('VertexAISdkException toString', () {
+    test('FirebaseAISdkException toString', () {
       final exception = FirebaseAISdkException('SDK failed to parse response.');
       expect(
           exception.toString(),
           'SDK failed to parse response.\n'
-          'This indicates a problem with the Vertex AI in Firebase SDK. '
+          'This indicates a problem with the Firebase AI Logic SDK. '
           'Try updating to the latest version '
           '(https://pub.dev/packages/firebase_ai/versions), '
           'or file an issue at '
@@ -143,7 +143,7 @@ void main() {
             'The Vertex AI in Firebase SDK requires the Vertex AI in Firebase API '
             '(`firebasevertexai.googleapis.com`) to be enabled in your Firebase project. Enable this API '
             'by visiting the Firebase Console at '
-            'https://console.firebase.google.com/project/my-project-id/genai '
+            'https://console.firebase.google.com/project/my-project-id/ailogic '
             'and clicking "Get started". If you enabled this API recently, wait a few minutes for the '
             'action to propagate to our systems and then retry.');
       });

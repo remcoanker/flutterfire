@@ -101,7 +101,6 @@ static NSMutableDictionary<NSNumber *, FIRAuthCredential *> *credentialsMap;
 @end
 
 @implementation FLTFirebaseAuthPlugin {
-#if TARGET_OS_IPHONE
   // Map an id to a MultiFactorSession object.
   NSMutableDictionary<NSString *, FIRMultiFactorSession *> *_multiFactorSessionMap;
 
@@ -114,7 +113,8 @@ static NSMutableDictionary<NSNumber *, FIRAuthCredential *> *credentialsMap;
   // Map an id to a MultiFactorResolver object.
   NSMutableDictionary<NSString *, FIRTOTPSecret *> *_multiFactorTotpSecretMap;
 
-#endif
+  // Emulator host/port per app, used to build REST URLs for workarounds.
+  NSMutableDictionary<NSString *, NSDictionary *> *_emulatorConfigs;
 
   NSObject<FlutterBinaryMessenger> *_binaryMessenger;
   NSMutableDictionary<NSString *, FlutterEventChannel *> *_eventChannels;
@@ -133,13 +133,11 @@ static NSMutableDictionary<NSNumber *, FIRAuthCredential *> *credentialsMap;
     _eventChannels = [NSMutableDictionary dictionary];
     _streamHandlers = [NSMutableDictionary dictionary];
 
-#if TARGET_OS_IPHONE
     _multiFactorSessionMap = [NSMutableDictionary dictionary];
     _multiFactorResolverMap = [NSMutableDictionary dictionary];
     _multiFactorAssertionMap = [NSMutableDictionary dictionary];
     _multiFactorTotpSecretMap = [NSMutableDictionary dictionary];
-
-#endif
+    _emulatorConfigs = [NSMutableDictionary dictionary];
   }
   return self;
 }
@@ -154,15 +152,19 @@ static NSMutableDictionary<NSNumber *, FIRAuthCredential *> *credentialsMap;
 
   [registrar publish:instance];
   [registrar addApplicationDelegate:instance];
+#if !TARGET_OS_OSX
+  if (@available(iOS 13.0, *)) {
+    if ([registrar respondsToSelector:@selector(addSceneDelegate:)]) {
+      [registrar performSelector:@selector(addSceneDelegate:) withObject:instance];
+    }
+  }
+#endif
   SetUpFirebaseAuthHostApi(registrar.messenger, instance);
   SetUpFirebaseAuthUserHostApi(registrar.messenger, instance);
-
-#if TARGET_OS_IPHONE
   SetUpMultiFactorUserHostApi(registrar.messenger, instance);
   SetUpMultiFactoResolverHostApi(registrar.messenger, instance);
   SetUpMultiFactorTotpHostApi(registrar.messenger, instance);
   SetUpMultiFactorTotpSecretHostApi(registrar.messenger, instance);
-#endif
 }
 
 + (FlutterError *)convertToFlutterError:(NSError *)error {
@@ -282,6 +284,18 @@ static NSMutableDictionary<NSNumber *, FIRAuthCredential *> *credentialsMap;
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary *)options {
   return [[FIRAuth auth] canHandleURL:url];
+}
+
+#pragma mark - SceneDelegate
+
+- (BOOL)scene:(UIScene *)scene
+    openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts API_AVAILABLE(ios(13.0)) {
+  for (UIOpenURLContext *urlContext in URLContexts) {
+    if ([[FIRAuth auth] canHandleURL:urlContext.URL]) {
+      return YES;
+    }
+  }
+  return NO;
 }
 #endif
 
@@ -509,11 +523,6 @@ static void handleSignInWithApple(FLTFirebaseAuthPlugin *object, FIRAuthDataResu
                     completion:(nonnull void (^)(PigeonUserCredential *_Nullable,
                                                  FlutterError *_Nullable))completion
                      withError:(NSError *_Nullable)error {
-#if TARGET_OS_OSX
-  completion(nil, [FlutterError errorWithCode:@"second-factor-required"
-                                      message:error.description
-                                      details:nil]);
-#else
   FIRMultiFactorResolver *resolver =
       (FIRMultiFactorResolver *)error.userInfo[FIRAuthErrorUserInfoMultiFactorResolverKey];
 
@@ -554,7 +563,6 @@ static void handleSignInWithApple(FLTFirebaseAuthPlugin *object, FIRAuthDataResu
   completion(nil, [FlutterError errorWithCode:@"second-factor-required"
                                       message:error.description
                                       details:output]);
-#endif
 }
 
 static void launchAppleSignInRequest(FLTFirebaseAuthPlugin *object, AuthPigeonFirebaseApp *app,
@@ -835,29 +843,56 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
 #endif
 }
 
-#if !TARGET_OS_OSX
 - (FIRMultiFactor *)getAppMultiFactorFromPigeon:(nonnull AuthPigeonFirebaseApp *)app {
   FIRAuth *auth = [self getFIRAuthFromAppNameFromPigeon:app];
   FIRUser *currentUser = auth.currentUser;
   return currentUser.multiFactor;
 }
-#endif
 
 - (nonnull ASPresentationAnchor)presentationAnchorForAuthorizationController:
     (nonnull ASAuthorizationController *)controller API_AVAILABLE(macos(10.15), ios(13.0)) {
 #if TARGET_OS_OSX
   return [[NSApplication sharedApplication] keyWindow];
 #else
+  // UIApplication.keyWindow is deprecated in iOS 13+ with UIScene lifecycle.
+  // Walk the connected scenes to find the foreground active window.
+  if (@available(iOS 15.0, *)) {
+    for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
+      if (scene.activationState == UISceneActivationStateForegroundActive &&
+          [scene isKindOfClass:[UIWindowScene class]]) {
+        UIWindowScene *windowScene = (UIWindowScene *)scene;
+        if (windowScene.keyWindow) {
+          return windowScene.keyWindow;
+        }
+      }
+    }
+  } else if (@available(iOS 13.0, *)) {
+    for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
+      if (scene.activationState == UISceneActivationStateForegroundActive &&
+          [scene isKindOfClass:[UIWindowScene class]]) {
+        UIWindowScene *windowScene = (UIWindowScene *)scene;
+        for (UIWindow *window in windowScene.windows) {
+          if (window.isKeyWindow) {
+            return window;
+          }
+        }
+      }
+    }
+  }
   return [[UIApplication sharedApplication] keyWindow];
 #endif
 }
-
-#if TARGET_OS_IPHONE
 
 - (void)enrollPhoneApp:(nonnull AuthPigeonFirebaseApp *)app
              assertion:(nonnull PigeonPhoneMultiFactorAssertion *)assertion
            displayName:(nullable NSString *)displayName
             completion:(nonnull void (^)(FlutterError *_Nullable))completion {
+#if TARGET_OS_OSX
+  completion([FlutterError errorWithCode:@"unsupported-platform"
+                                 message:@"Phone authentication is not supported on macOS"
+                                 details:nil]);
+#else
+
   FIRMultiFactor *multiFactor = [self getAppMultiFactorFromPigeon:app];
 
   FIRPhoneAuthCredential *credential =
@@ -879,6 +914,7 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
                                                            details:nil]);
                           }
                         }];
+#endif
 }
 
 - (void)getEnrolledFactorsApp:(nonnull AuthPigeonFirebaseApp *)app
@@ -969,10 +1005,12 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
   FIRMultiFactorAssertion *multiFactorAssertion;
 
   if (assertion != nil) {
+#if TARGET_OS_IPHONE
     FIRPhoneAuthCredential *credential =
         [[FIRPhoneAuthProvider provider] credentialWithVerificationID:[assertion verificationId]
                                                      verificationCode:[assertion verificationCode]];
     multiFactorAssertion = [FIRPhoneMultiFactorGenerator assertionWithCredential:credential];
+#endif
   } else if (totpAssertionId != nil) {
     multiFactorAssertion = _multiFactorAssertionMap[totpAssertionId];
   } else {
@@ -1065,8 +1103,6 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
   completion(nil);
 }
 
-#endif
-
 - (void)applyActionCodeApp:(nonnull AuthPigeonFirebaseApp *)app
                       code:(nonnull NSString *)code
                 completion:(nonnull void (^)(FlutterError *_Nullable))completion {
@@ -1105,7 +1141,20 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
                if (error != nil) {
                  completion(nil, [FLTFirebaseAuthPlugin convertToFlutterError:error]);
                } else {
-                 completion([self parseActionCode:info], nil);
+                 PigeonActionCodeInfo *result = [self parseActionCode:info];
+                 if (result.operation == ActionCodeInfoOperationUnknown) {
+                   // Workaround: Firebase iOS SDK >=11.12.0 returns .unknown because
+                   // actionCodeOperation(forRequestType:) only matches camelCase but the
+                   // REST API returns SCREAMING_SNAKE_CASE (e.g. "VERIFY_EMAIL").
+                   // Re-fetch the raw requestType via REST to resolve the operation.
+                   // See: https://github.com/firebase/flutterfire/issues/17452
+                   [self resolveActionCodeOperationForApp:app
+                                                     code:code
+                                             fallbackInfo:result
+                                               completion:completion];
+                 } else {
+                   completion(result, nil);
+                 }
                }
              }];
 }
@@ -1133,6 +1182,91 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
   }
 
   return [PigeonActionCodeInfo makeWithOperation:operation data:data];
+}
+
+/// Maps a raw requestType string (either camelCase or SCREAMING_SNAKE_CASE) to
+/// the corresponding Pigeon enum value.
++ (ActionCodeInfoOperation)operationFromRequestType:(nullable NSString *)requestType {
+  static NSDictionary<NSString *, NSNumber *> *mapping;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    mapping = @{
+      @"PASSWORD_RESET" : @(ActionCodeInfoOperationPasswordReset),
+      @"resetPassword" : @(ActionCodeInfoOperationPasswordReset),
+      @"VERIFY_EMAIL" : @(ActionCodeInfoOperationVerifyEmail),
+      @"verifyEmail" : @(ActionCodeInfoOperationVerifyEmail),
+      @"RECOVER_EMAIL" : @(ActionCodeInfoOperationRecoverEmail),
+      @"recoverEmail" : @(ActionCodeInfoOperationRecoverEmail),
+      @"EMAIL_SIGNIN" : @(ActionCodeInfoOperationEmailSignIn),
+      @"signIn" : @(ActionCodeInfoOperationEmailSignIn),
+      @"VERIFY_AND_CHANGE_EMAIL" : @(ActionCodeInfoOperationVerifyAndChangeEmail),
+      @"verifyAndChangeEmail" : @(ActionCodeInfoOperationVerifyAndChangeEmail),
+      @"REVERT_SECOND_FACTOR_ADDITION" : @(ActionCodeInfoOperationRevertSecondFactorAddition),
+      @"revertSecondFactorAddition" : @(ActionCodeInfoOperationRevertSecondFactorAddition),
+    };
+  });
+
+  NSNumber *value = mapping[requestType];
+  return value ? (ActionCodeInfoOperation)value.integerValue : ActionCodeInfoOperationUnknown;
+}
+
+/// Calls the Identity Toolkit REST API directly to retrieve the raw requestType
+/// string, which the iOS SDK fails to parse correctly. Falls back to the original
+/// result if the REST call fails for any reason.
+- (void)resolveActionCodeOperationForApp:(nonnull AuthPigeonFirebaseApp *)app
+                                    code:(nonnull NSString *)code
+                            fallbackInfo:(nonnull PigeonActionCodeInfo *)fallbackInfo
+                              completion:(nonnull void (^)(PigeonActionCodeInfo *_Nullable,
+                                                           FlutterError *_Nullable))completion {
+  FIRApp *firebaseApp = [FLTFirebasePlugin firebaseAppNamed:app.appName];
+  NSString *apiKey = firebaseApp.options.APIKey;
+
+  NSString *baseURL;
+  NSDictionary *emulatorConfig = _emulatorConfigs[app.appName];
+  if (emulatorConfig) {
+    baseURL = [NSString stringWithFormat:@"http://%@:%@/identitytoolkit.googleapis.com",
+                                         emulatorConfig[@"host"], emulatorConfig[@"port"]];
+  } else {
+    baseURL = @"https://identitytoolkit.googleapis.com";
+  }
+
+  NSString *urlString =
+      [NSString stringWithFormat:@"%@/v1/accounts:resetPassword?key=%@", baseURL, apiKey];
+  NSURL *url = [NSURL URLWithString:urlString];
+
+  NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+  request.HTTPMethod = @"POST";
+  [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+  request.HTTPBody = [NSJSONSerialization dataWithJSONObject:@{@"oobCode" : code}
+                                                     options:0
+                                                       error:nil];
+
+  NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+      dataTaskWithRequest:request
+        completionHandler:^(NSData *_Nullable data, NSURLResponse *_Nullable response,
+                            NSError *_Nullable error) {
+          if (error || !data) {
+            completion(fallbackInfo, nil);
+            return;
+          }
+
+          NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+          if (!json || json[@"error"]) {
+            completion(fallbackInfo, nil);
+            return;
+          }
+
+          ActionCodeInfoOperation operation =
+              [FLTFirebaseAuthPlugin operationFromRequestType:json[@"requestType"]];
+
+          if (operation != ActionCodeInfoOperationUnknown) {
+            completion([PigeonActionCodeInfo makeWithOperation:operation data:fallbackInfo.data],
+                       nil);
+          } else {
+            completion(fallbackInfo, nil);
+          }
+        }];
+  [task resume];
 }
 
 - (void)confirmPasswordResetApp:(nonnull AuthPigeonFirebaseApp *)app
@@ -1568,6 +1702,7 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
             completion:(nonnull void (^)(FlutterError *_Nullable))completion {
   FIRAuth *auth = [self getFIRAuthFromAppNameFromPigeon:app];
   [auth useEmulatorWithHost:host port:port];
+  _emulatorConfigs[app.appName] = @{@"host" : host, @"port" : @(port)};
   completion(nil);
 }
 
@@ -1915,7 +2050,7 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
     if (error != nil) {
       completion(nil, [FLTFirebaseAuthPlugin convertToFlutterError:error]);
     } else {
-      completion([PigeonParser getPigeonDetails:auth.currentUser], nil);
+      completion([PigeonParser getPigeonDetails:currentUser], nil);
     }
   }];
 }
@@ -1991,7 +2126,7 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
                       if (reloadError != nil) {
                         completion(nil, [FLTFirebaseAuthPlugin convertToFlutterError:reloadError]);
                       } else {
-                        completion([PigeonParser getPigeonDetails:auth.currentUser], nil);
+                        completion([PigeonParser getPigeonDetails:currentUser], nil);
                       }
                     }];
                   }
@@ -2021,7 +2156,7 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
                 if (reloadError != nil) {
                   completion(nil, [FLTFirebaseAuthPlugin convertToFlutterError:reloadError]);
                 } else {
-                  completion([PigeonParser getPigeonDetails:auth.currentUser], nil);
+                  completion([PigeonParser getPigeonDetails:currentUser], nil);
                 }
               }];
             }
@@ -2077,9 +2212,8 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
                                                                                  reloadError]);
                                                               } else {
                                                                 completion(
-                                                                    [PigeonParser
-                                                                        getPigeonDetails:
-                                                                            auth.currentUser],
+                                                                    [PigeonParser getPigeonDetails:
+                                                                                      currentUser],
                                                                     nil);
                                                               }
                                                             }];
@@ -2132,7 +2266,7 @@ static void handleAppleAuthResult(FLTFirebaseAuthPlugin *object, AuthPigeonFireb
         if (reloadError != nil) {
           completion(nil, [FLTFirebaseAuthPlugin convertToFlutterError:reloadError]);
         } else {
-          completion([PigeonParser getPigeonDetails:auth.currentUser], nil);
+          completion([PigeonParser getPigeonDetails:currentUser], nil);
         }
       }];
     }

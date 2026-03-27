@@ -8,6 +8,7 @@ import static com.google.firebase.firestore.AggregateField.average;
 import static com.google.firebase.firestore.AggregateField.count;
 import static com.google.firebase.firestore.AggregateField.sum;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -33,6 +34,7 @@ import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Source;
 import com.google.firebase.firestore.Transaction;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.firestore.remote.FirestoreChannel;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
@@ -129,9 +131,12 @@ public class FlutterFirebaseFirestorePlugin
     }
   }
 
+  @SuppressLint("RestrictedApi")
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
     initInstance(binding.getBinaryMessenger());
+    FirestoreChannel.setClientLanguage(
+        "gl-dart/" + io.flutter.plugins.firebase.firestore.BuildConfig.LIBRARY_VERSION);
   }
 
   @Override
@@ -202,15 +207,17 @@ public class FlutterFirebaseFirestorePlugin
         () -> {
           try {
             // Context is ignored by API so we don't send it over even though annotated non-null.
+            List<FirebaseFirestore> firestoresToTerminate;
             synchronized (firestoreInstanceCache) {
-              for (Map.Entry<FirebaseFirestore, FlutterFirebaseFirestoreExtension> entry :
-                  firestoreInstanceCache.entrySet()) {
-                FirebaseFirestore firestore = entry.getKey();
+              // Collect all firestore instances first to avoid ConcurrentModificationException
+              firestoresToTerminate = new ArrayList<>(firestoreInstanceCache.keySet());
+              for (FirebaseFirestore firestore : firestoresToTerminate) {
                 Tasks.await(firestore.terminate());
                 FlutterFirebaseFirestorePlugin.destroyCachedFirebaseFirestoreInstanceForKey(
                     firestore);
               }
             }
+
             removeEventListeners();
 
             taskCompletionSource.setResult(null);
@@ -878,8 +885,6 @@ public class FlutterFirebaseFirestorePlugin
               GeneratedAndroidFirebaseFirestore.PigeonTransactionType type =
                   Objects.requireNonNull(write.getType());
               String path = Objects.requireNonNull(write.getPath());
-              Map<String, Object> data = write.getData();
-
               DocumentReference documentReference = firestore.document(path);
 
               switch (type) {
@@ -887,29 +892,55 @@ public class FlutterFirebaseFirestorePlugin
                   batch = batch.delete(documentReference);
                   break;
                 case UPDATE:
-                  batch = batch.update(documentReference, Objects.requireNonNull(data));
-                  break;
-                case SET:
-                  GeneratedAndroidFirebaseFirestore.PigeonDocumentOption options =
-                      Objects.requireNonNull(write.getOption());
-
-                  if (options.getMerge() != null && options.getMerge()) {
+                  {
+                    Map<Object, Object> rawData = Objects.requireNonNull(write.getData());
+                    Map<FieldPath, Object> updateData = new HashMap<>();
+                    for (Object key : rawData.keySet()) {
+                      if (key instanceof String) {
+                        updateData.put(FieldPath.of((String) key), rawData.get(key));
+                      } else if (key instanceof FieldPath) {
+                        updateData.put((FieldPath) key, rawData.get(key));
+                      }
+                    }
+                    FieldPath firstFieldPath = updateData.keySet().iterator().next();
+                    Object firstObject = updateData.get(firstFieldPath);
+                    ArrayList<Object> flattenData = new ArrayList<>();
+                    for (FieldPath fieldPath : updateData.keySet()) {
+                      if (fieldPath.equals(firstFieldPath)) {
+                        continue;
+                      }
+                      flattenData.add(fieldPath);
+                      flattenData.add(updateData.get(fieldPath));
+                    }
                     batch =
-                        batch.set(
-                            documentReference, Objects.requireNonNull(data), SetOptions.merge());
-                  } else if (options.getMergeFields() != null) {
-                    List<FieldPath> fieldPathList =
-                        PigeonParser.parseFieldPath(
-                            Objects.requireNonNull(options.getMergeFields()));
-                    batch =
-                        batch.set(
-                            documentReference,
-                            Objects.requireNonNull(data),
-                            SetOptions.mergeFieldPaths(fieldPathList));
-                  } else {
-                    batch = batch.set(documentReference, Objects.requireNonNull(data));
+                        batch.update(
+                            documentReference, firstFieldPath, firstObject, flattenData.toArray());
+                    break;
                   }
-                  break;
+                case SET:
+                  {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> setData =
+                        (Map<String, Object>) (Map<?, ?>) Objects.requireNonNull(write.getData());
+                    GeneratedAndroidFirebaseFirestore.PigeonDocumentOption options =
+                        Objects.requireNonNull(write.getOption());
+
+                    if (options.getMerge() != null && options.getMerge()) {
+                      batch = batch.set(documentReference, setData, SetOptions.merge());
+                    } else if (options.getMergeFields() != null) {
+                      List<FieldPath> fieldPathList =
+                          PigeonParser.parseFieldPath(
+                              Objects.requireNonNull(options.getMergeFields()));
+                      batch =
+                          batch.set(
+                              documentReference,
+                              setData,
+                              SetOptions.mergeFieldPaths(fieldPathList));
+                    } else {
+                      batch = batch.set(documentReference, setData);
+                    }
+                    break;
+                  }
               }
             }
 

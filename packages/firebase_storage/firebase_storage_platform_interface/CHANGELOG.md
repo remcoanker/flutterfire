@@ -1,3 +1,43 @@
+## 5.2.19
+
+ - **REFACTOR**: fix formatting and analysis issues across the repo ([#18124](https://github.com/firebase/flutterfire/issues/18124)). ([ab79fd93](https://github.com/firebase/flutterfire/commit/ab79fd93ee4ccfeb478687623134b1cf8ab71c74))
+
+## 5.2.18
+
+ - Update a dependency to the latest release.
+
+## 5.2.17
+
+ - Update a dependency to the latest release.
+
+## 5.2.16
+
+ - Update a dependency to the latest release.
+
+## 5.2.15
+
+ - **REFACTOR**(storage): Refactor Java and Objc to Kotlin and Swift ([#17795](https://github.com/firebase/flutterfire/issues/17795)). ([9cc9054c](https://github.com/firebase/flutterfire/commit/9cc9054c22feb18f5aec187484da8dfab9b07391))
+
+## 5.2.14
+
+ - Update a dependency to the latest release.
+
+## 5.2.13
+
+ - Update a dependency to the latest release.
+
+## 5.2.12
+
+ - Update a dependency to the latest release.
+
+## 5.2.11
+
+ - Update a dependency to the latest release.
+
+## 5.2.10
+
+ - Update a dependency to the latest release.
+
 ## 5.2.9
 
  - Update a dependency to the latest release.

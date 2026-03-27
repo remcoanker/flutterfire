@@ -1,3 +1,47 @@
+## 0.3.1
+
+ - **FEAT**(database,windows): add support for Realtime Database to windows ([#18079](https://github.com/firebase/flutterfire/issues/18079)). ([007689f9](https://github.com/firebase/flutterfire/commit/007689f99866582828a063d174c52ebba13ac0ef))
+
+## 0.3.0+3
+
+ - Update a dependency to the latest release.
+
+## 0.3.0+2
+
+ - Update a dependency to the latest release.
+
+## 0.3.0+1
+
+ - Update a dependency to the latest release.
+
+## 0.3.0
+
+ - **FEAT**(database): add support for Pigeon. Update iOS to Swift and Android to Kotlin ([#17686](https://github.com/firebase/flutterfire/issues/17686)). ([dac0b0bd](https://github.com/firebase/flutterfire/commit/dac0b0bd033b1c51446aedf0413740ef426877b8))
+
+## 0.2.6+15
+
+ - Update a dependency to the latest release.
+
+## 0.2.6+14
+
+ - Update a dependency to the latest release.
+
+## 0.2.6+13
+
+ - Update a dependency to the latest release.
+
+## 0.2.6+12
+
+ - Update a dependency to the latest release.
+
+## 0.2.6+11
+
+ - Update a dependency to the latest release.
+
+## 0.2.6+10
+
+ - Update a dependency to the latest release.
+
 ## 0.2.6+9
 
  - Update a dependency to the latest release.

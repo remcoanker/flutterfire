@@ -1,3 +1,44 @@
+## 3.11.4
+
+ - **REFACTOR**: fix formatting and analysis issues across the repo ([#18124](https://github.com/firebase/flutterfire/issues/18124)). ([ab79fd93](https://github.com/firebase/flutterfire/commit/ab79fd93ee4ccfeb478687623134b1cf8ab71c74))
+
+## 3.11.3
+
+ - Update a dependency to the latest release.
+
+## 3.11.2
+
+ - Update a dependency to the latest release.
+
+## 3.11.1
+
+ - Update a dependency to the latest release.
+
+## 3.11.0
+
+ - **FIX**(storage,web): More explicit interop types ([#17828](https://github.com/firebase/flutterfire/issues/17828)). ([65a441e7](https://github.com/firebase/flutterfire/commit/65a441e7cd08d4803a7a28834c069743af2dcf4d))
+ - **FEAT**(web): add `registerVersion` support for packages ([#17780](https://github.com/firebase/flutterfire/issues/17780)). ([3c8c83d4](https://github.com/firebase/flutterfire/commit/3c8c83d4251f2965ae6fb1fe7b64c21dcb94e9ec))
+
+## 3.10.21
+
+ - Update a dependency to the latest release.
+
+## 3.10.20
+
+ - Update a dependency to the latest release.
+
+## 3.10.19
+
+ - Update a dependency to the latest release.
+
+## 3.10.18
+
+ - Update a dependency to the latest release.
+
+## 3.10.17
+
+ - Update a dependency to the latest release.
+
 ## 3.10.16
 
  - Update a dependency to the latest release.

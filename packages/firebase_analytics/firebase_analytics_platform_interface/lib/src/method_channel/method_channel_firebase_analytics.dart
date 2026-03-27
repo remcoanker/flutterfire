@@ -134,25 +134,6 @@ class MethodChannelFirebaseAnalytics extends FirebaseAnalyticsPlatform {
   }
 
   @override
-  Future<void> setCurrentScreen({
-    String? screenName,
-    String? screenClassOverride,
-    AnalyticsCallOptions? callOptions,
-  }) {
-    try {
-      return _api.logEvent(<String, Object?>{
-        'eventName': 'screen_view',
-        'parameters': <String, String?>{
-          'screen_name': screenName,
-          'screen_class': screenClassOverride,
-        },
-      });
-    } catch (e, s) {
-      convertPlatformException(e, s);
-    }
-  }
-
-  @override
   Future<void> setUserProperty({
     required String name,
     required String? value,
@@ -210,6 +191,17 @@ class MethodChannelFirebaseAnalytics extends FirebaseAnalyticsPlatform {
           'hashedPhoneNumber': hashedPhoneNumber,
         },
       );
+    } catch (e, s) {
+      convertPlatformException(e, s);
+    }
+  }
+
+  @override
+  Future<void> logTransaction({
+    required String transactionId,
+  }) {
+    try {
+      return _api.logTransaction(transactionId);
     } catch (e, s) {
       convertPlatformException(e, s);
     }

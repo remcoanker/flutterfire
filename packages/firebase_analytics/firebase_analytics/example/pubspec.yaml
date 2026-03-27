@@ -6,10 +6,11 @@ environment:
   flutter: '>=3.3.0'
 
 dependencies:
-  firebase_analytics: ^11.5.2
-  firebase_core: ^3.15.1
+  firebase_analytics: ^12.2.0
+  firebase_core: ^4.6.0
   flutter:
     sdk: flutter
+  in_app_purchase: ^3.2.3
 
 flutter:
   uses-material-design: true

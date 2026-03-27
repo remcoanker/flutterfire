@@ -12,15 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import '../widgets/message_widget.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key, required this.title, required this.model});
+  const ChatPage({
+    super.key,
+    required this.title,
+    required this.useVertexBackend,
+  });
 
   final String title;
-  final GenerativeModel model;
+  final bool useVertexBackend;
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -28,16 +33,41 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   ChatSession? _chat;
+  GenerativeModel? _model;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _textController = TextEditingController();
   final FocusNode _textFieldFocus = FocusNode();
   final List<MessageData> _messages = <MessageData>[];
   bool _loading = false;
+  bool _enableThinking = false;
 
   @override
   void initState() {
     super.initState();
-    _chat = widget.model.startChat();
+    _initializeChat();
+  }
+
+  void _initializeChat() {
+    final generationConfig = GenerationConfig(
+      thinkingConfig: _enableThinking
+          ? ThinkingConfig.withThinkingBudget(
+              null,
+              includeThoughts: true,
+            ) // Using thinkingBudget since we are testing with gemini 2.5
+          : null,
+    );
+    if (widget.useVertexBackend) {
+      _model = FirebaseAI.vertexAI(auth: FirebaseAuth.instance).generativeModel(
+        model: 'gemini-2.5-flash',
+        generationConfig: generationConfig,
+      );
+    } else {
+      _model = FirebaseAI.googleAI(auth: FirebaseAuth.instance).generativeModel(
+        model: 'gemini-2.5-flash',
+        generationConfig: generationConfig,
+      );
+    }
+    _chat = _model?.startChat();
   }
 
   void _scrollDown() {
@@ -64,14 +94,31 @@ class _ChatPageState extends State<ChatPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SwitchListTile(
+              title: const Text('Enable Thinking'),
+              value: _enableThinking,
+              onChanged: (bool value) {
+                setState(() {
+                  _enableThinking = value;
+                  _initializeChat();
+                });
+              },
+            ),
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
                 itemBuilder: (context, idx) {
+                  final message = _messages[idx];
                   return MessageWidget(
-                    text: _messages[idx].text,
-                    image: _messages[idx].image,
-                    isFromUser: _messages[idx].fromUser ?? false,
+                    text: message.text,
+                    image: message.imageBytes != null
+                        ? Image.memory(
+                            message.imageBytes!,
+                            cacheWidth: 400,
+                            cacheHeight: 400,
+                          )
+                        : null,
+                    isFromUser: message.fromUser ?? false,
                   );
                 },
                 itemCount: _messages.length,
@@ -96,14 +143,27 @@ class _ChatPageState extends State<ChatPage> {
                     dimension: 15,
                   ),
                   if (!_loading)
-                    IconButton(
-                      onPressed: () async {
-                        await _sendChatMessage(_textController.text);
-                      },
-                      icon: Icon(
-                        Icons.send,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            _sendChatMessage(_textController.text);
+                          },
+                          icon: Icon(
+                            Icons.send,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _sendStreamingChatMessage(_textController.text);
+                          },
+                          icon: Icon(
+                            Icons.stream,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
                     )
                   else
                     const CircularProgressIndicator(),
@@ -116,6 +176,55 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  Future<void> _sendStreamingChatMessage(String message) async {
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      _messages.add(MessageData(text: message, fromUser: true));
+      final responseStream = _chat?.sendMessageStream(
+        Content.text(message),
+      );
+
+      if (responseStream == null) {
+        _showError('No response from API.');
+        return;
+      }
+      final textBuffer = StringBuffer();
+      _messages.add(MessageData(text: textBuffer.toString(), fromUser: false));
+
+      await for (final response in responseStream) {
+        final thought = response.thoughtSummary;
+        if (thought != null) {
+          _messages.insert(
+            _messages.length - 1,
+            MessageData(text: thought, fromUser: false, isThought: true),
+          );
+        }
+        textBuffer.write(response.text ?? '');
+        setState(() {
+          _messages.last =
+              MessageData(text: textBuffer.toString(), fromUser: false);
+        });
+        _scrollDown();
+      }
+
+      if (textBuffer.isEmpty) {
+        _showError('No response from API.');
+        return;
+      }
+    } catch (e) {
+      _showError(e.toString());
+    } finally {
+      _textController.clear();
+      setState(() {
+        _loading = false;
+      });
+      _textFieldFocus.requestFocus();
+    }
+  }
+
   Future<void> _sendChatMessage(String message) async {
     setState(() {
       _loading = true;
@@ -126,6 +235,11 @@ class _ChatPageState extends State<ChatPage> {
       var response = await _chat?.sendMessage(
         Content.text(message),
       );
+      final thought = response?.thoughtSummary;
+      if (thought != null) {
+        _messages
+            .add(MessageData(text: thought, fromUser: false, isThought: true));
+      }
       var text = response?.text;
       _messages.add(MessageData(text: text, fromUser: false));
 

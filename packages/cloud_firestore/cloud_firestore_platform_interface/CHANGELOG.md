@@ -1,3 +1,47 @@
+## 7.1.0
+
+ - **REFACTOR**: fix formatting and analysis issues across the repo ([#18124](https://github.com/firebase/flutterfire/issues/18124)). ([ab79fd93](https://github.com/firebase/flutterfire/commit/ab79fd93ee4ccfeb478687623134b1cf8ab71c74))
+ - **FEAT**(firestore): add support for FieldPath in update transactions ([#18121](https://github.com/firebase/flutterfire/issues/18121)). ([aa1f17a5](https://github.com/firebase/flutterfire/commit/aa1f17a554af0938c13f8500e3cfcd586377f3b0))
+ - **FEAT**(firestore,web): add webPersistentTabManager settings support ([#18067](https://github.com/firebase/flutterfire/issues/18067)). ([397ba523](https://github.com/firebase/flutterfire/commit/397ba523df968e8deb92e679f54ea837f28b23e3))
+
+## 7.0.7
+
+ - Update a dependency to the latest release.
+
+## 7.0.6
+
+ - Update a dependency to the latest release.
+
+## 7.0.5
+
+ - Update a dependency to the latest release.
+
+## 7.0.4
+
+ - Update a dependency to the latest release.
+
+## 7.0.3
+
+ - Update a dependency to the latest release.
+
+## 7.0.2
+
+ - Update a dependency to the latest release.
+
+## 7.0.1
+
+ - Update a dependency to the latest release.
+
+## 7.0.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**(firestore): remove deprecated functions ([#17559](https://github.com/firebase/flutterfire/issues/17559)). ([67017fd6](https://github.com/firebase/flutterfire/commit/67017fd6f139080cec7ecd1b4d75a05f13f238fa))
+
+## 6.6.12
+
+ - Update a dependency to the latest release.
+
 ## 6.6.11
 
  - Update a dependency to the latest release.

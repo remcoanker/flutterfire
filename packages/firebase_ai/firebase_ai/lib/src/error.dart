@@ -23,7 +23,7 @@ final class FirebaseAIException implements Exception {
   final String message;
 
   @override
-  String toString() => 'VertexAIException: $message';
+  String toString() => 'FirebaseAIException: $message';
 }
 
 /// Exception thrown when the server rejects the API key.
@@ -56,7 +56,7 @@ final class ServiceApiNotEnabled implements FirebaseAIException {
       'The Vertex AI in Firebase SDK requires the Vertex AI in Firebase API '
       '(`firebasevertexai.googleapis.com`) to be enabled in your Firebase project. Enable this API '
       'by visiting the Firebase Console at '
-      'https://console.firebase.google.com/project/$_id/genai '
+      'https://console.firebase.google.com/project/$_id/ailogic '
       'and clicking "Get started". If you enabled this API recently, wait a few minutes for the '
       'action to propagate to our systems and then retry.';
 
@@ -104,7 +104,7 @@ final class FirebaseAISdkException implements Exception {
 
   @override
   String toString() => '$message\n'
-      'This indicates a problem with the Vertex AI in Firebase SDK. '
+      'This indicates a problem with the Firebase AI Logic SDK. '
       'Try updating to the latest version '
       '(https://pub.dev/packages/firebase_ai/versions), '
       'or file an issue at '

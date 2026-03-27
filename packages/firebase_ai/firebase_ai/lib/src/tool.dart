@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async';
+
 import 'schema.dart';
 
 /// Tool details that the model may use to generate a response.
@@ -21,12 +23,13 @@ import 'schema.dart';
 /// knowledge and scope of the model.
 final class Tool {
   // ignore: public_member_api_docs
-  Tool._(this._functionDeclarations, this._googleSearch);
+  Tool._(this._functionDeclarations, this._googleSearch, this._codeExecution,
+      this._urlContext);
 
   /// Returns a [Tool] instance with list of [FunctionDeclaration].
   static Tool functionDeclarations(
       List<FunctionDeclaration> functionDeclarations) {
-    return Tool._(functionDeclarations, null);
+    return Tool._(functionDeclarations, null, null, null);
   }
 
   /// Creates a tool that allows the model to use Grounding with Google Search.
@@ -47,7 +50,30 @@ final class Tool {
   ///
   /// Returns a `Tool` configured for Google Search.
   static Tool googleSearch({GoogleSearch googleSearch = const GoogleSearch()}) {
-    return Tool._(null, googleSearch);
+    return Tool._(null, googleSearch, null, null);
+  }
+
+  /// Returns a [Tool] instance that enables the model to use Code Execution.
+  static Tool codeExecution(
+      {CodeExecution codeExecution = const CodeExecution()}) {
+    return Tool._(null, null, codeExecution, null);
+  }
+
+  /// Creates a tool that allows you to provide additional context to the models
+  /// in the form of public web URLs.
+  ///
+  /// By including URLs in your request, the Gemini model will access the
+  /// content from those pages to inform and enhance its response.
+  ///
+  /// - [urlContext]: Specifies the URL context configuration.
+  ///
+  /// Returns a `Tool` configured for URL context.
+  ///
+  /// > Warning: For Firebase AI Logic, URL Context
+  /// is in Public Preview, which means that the feature is not subject to any SLA
+  /// or deprecation policy and could change in backwards-incompatible ways.
+  static Tool urlContext({UrlContext urlContext = const UrlContext()}) {
+    return Tool._(null, null, null, urlContext);
   }
 
   /// A list of `FunctionDeclarations` available to the model that can be used
@@ -65,13 +91,32 @@ final class Tool {
   /// responses.
   final GoogleSearch? _googleSearch;
 
+  /// A tool that allows the model to use Code Execution.
+  final CodeExecution? _codeExecution;
+
+  /// A tool that allows providing URL context to the model.
+  final UrlContext? _urlContext;
+
+  /// Returns a list of all [AutoFunctionDeclaration] objects
+  /// found within the [_functionDeclarations] list.
+  List<AutoFunctionDeclaration> get autoFunctionDeclarations {
+    return _functionDeclarations
+            ?.whereType<AutoFunctionDeclaration>()
+            .toList() ??
+        [];
+  }
+
   /// Convert to json object.
   Map<String, Object> toJson() => {
         if (_functionDeclarations case final _functionDeclarations?)
           'functionDeclarations':
               _functionDeclarations.map((f) => f.toJson()).toList(),
         if (_googleSearch case final _googleSearch?)
-          'googleSearch': _googleSearch.toJson()
+          'googleSearch': _googleSearch.toJson(),
+        if (_codeExecution case final _codeExecution?)
+          'codeExecution': _codeExecution.toJson(),
+        if (_urlContext case final _urlContext?)
+          'urlContext': _urlContext.toJson(),
       };
 }
 
@@ -93,19 +138,48 @@ final class GoogleSearch {
   Map<String, Object> toJson() => {};
 }
 
+/// A tool that allows you to provide additional context to the models in the
+/// form of public web URLs. By including URLs in your request, the Gemini
+/// model will access the content from those pages to inform and enhance its
+/// response.
+///
+/// > Warning: For Firebase AI Logic, URL Context
+/// is in Public Preview, which means that the feature is not subject to any SLA
+/// or deprecation policy and could change in backwards-incompatible ways.
+final class UrlContext {
+  // ignore: public_member_api_docs
+  const UrlContext();
+
+  /// Convert to json object.
+  Map<String, Object> toJson() => {};
+}
+
+/// A tool that allows the model to use Code Execution.
+final class CodeExecution {
+  // ignore: public_member_api_docs
+  const CodeExecution();
+
+  /// Convert to json object.
+  Map<String, Object> toJson() => {};
+}
+
 /// Structured representation of a function declaration as defined by the
 /// [OpenAPI 3.03 specification](https://spec.openapis.org/oas/v3.0.3).
 ///
 /// Included in this declaration are the function name and parameters. This
 /// FunctionDeclaration is a representation of a block of code that can be used
 /// as a `Tool` by the model and executed by the client.
-final class FunctionDeclaration {
+class FunctionDeclaration {
   // ignore: public_member_api_docs
   FunctionDeclaration(this.name, this.description,
       {required Map<String, Schema> parameters,
       List<String> optionalParameters = const []})
-      : _schemaObject = Schema.object(
-            properties: parameters, optionalProperties: optionalParameters);
+      : _schemaObject = parameters.values.any((s) => s is JSONSchema)
+            ? JSONSchema.object(
+                properties: parameters.cast<String, JSONSchema>(),
+                optionalProperties: optionalParameters)
+            : Schema.object(
+                properties: parameters, optionalProperties: optionalParameters);
 
   /// The name of the function.
   ///
@@ -122,8 +196,34 @@ final class FunctionDeclaration {
   Map<String, Object?> toJson() => {
         'name': name,
         'description': description,
-        'parameters': _schemaObject.toJson()
+        if (_schemaObject is JSONSchema)
+          'parametersJsonSchema': _schemaObject.toJson()
+        else
+          'parameters': _schemaObject.toJson(),
       };
+}
+
+/// A [FunctionDeclaration] for auto function calling.
+final class AutoFunctionDeclaration extends FunctionDeclaration {
+  /// Creates an [AutoFunctionDeclaration].
+  ///
+  /// - [name]: The name of the function.
+  /// - [description]: A brief description of the function.
+  /// - [parameters]: The parameters of the function as a map of names to
+  ///   [Schema] objects.
+  /// - [callable]: The actual function implementation.
+  AutoFunctionDeclaration({
+    required String name,
+    required String description,
+    required Map<String, Schema> parameters,
+    List<String> optionalParameters = const [],
+    required this.callable,
+  }) : super(name, description,
+            parameters: parameters, optionalParameters: optionalParameters);
+
+  /// The callable function that this declaration represents.
+  final FutureOr<Map<String, Object?>> Function(Map<String, Object?> args)
+      callable;
 }
 
 /// Config for tools to use with model.

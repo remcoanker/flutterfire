@@ -1,3 +1,57 @@
+## 12.2.0
+
+ - **FIX**(analytics,iOS): Update hashedEmailAddress handling to use hex string conversion ([#18060](https://github.com/firebase/flutterfire/issues/18060)). ([80c6cff2](https://github.com/firebase/flutterfire/commit/80c6cff2836ef102c716d1e54eda8114b8ee629b))
+ - **FIX**(android): remove kotlin-android since AGP 9 supports it ([#18059](https://github.com/firebase/flutterfire/issues/18059)). ([1e39ad1f](https://github.com/firebase/flutterfire/commit/1e39ad1f146ce23742731ceeb30ff36c440b816f))
+ - **FEAT**(analytics): add support for items in logEvent ([#18097](https://github.com/firebase/flutterfire/issues/18097)). ([2b8517c8](https://github.com/firebase/flutterfire/commit/2b8517c88e4d4006119fd997982b895f1493ba0c))
+ - **FEAT**(analytics,iOS): add support for `logTransaction` ([#17995](https://github.com/firebase/flutterfire/issues/17995)). ([103d7ffa](https://github.com/firebase/flutterfire/commit/103d7ffa9343c654ec23c782a802b929dbf37d01))
+ - **FEAT**(analytics,ios): add support for FirebaseAnalyticsWithoutAdIdSupport with SPM ([#18061](https://github.com/firebase/flutterfire/issues/18061)). ([65dbd4bd](https://github.com/firebase/flutterfire/commit/65dbd4bd3995411a14d4efcf35c945cf344e56a9))
+ - **FEAT**(ios): migrate iOS to UIScene lifecycle ([#18054](https://github.com/firebase/flutterfire/issues/18054)). ([3ffa4110](https://github.com/firebase/flutterfire/commit/3ffa411098132fd5182a84be4e7a226106bc7451))
+ - **DOCS**(analytics): clarify `logInAppPurchase` API documentation for iOS usage ([#18087](https://github.com/firebase/flutterfire/issues/18087)). ([8a2ed9f7](https://github.com/firebase/flutterfire/commit/8a2ed9f7588232a80df06077ef3489114de68af3))
+
+## 12.1.3
+
+ - **FIX**(analytics,iOS): Update hashedPhoneNumber handling to use hex string conversion ([#17807](https://github.com/firebase/flutterfire/issues/17807)). ([407c2490](https://github.com/firebase/flutterfire/commit/407c2490602484499d1ab5b2ce6860af00a218c8))
+
+## 12.1.2
+
+ - **FIX**(firebase_analytics): update logInAppPurchase documentation to specify iOS support only ([#17968](https://github.com/firebase/flutterfire/issues/17968)). ([b3caa545](https://github.com/firebase/flutterfire/commit/b3caa54592d431a1ac1b7007a154cdf739b0e406))
+
+## 12.1.1
+
+ - Update a dependency to the latest release.
+
+## 12.1.0
+
+ - **FEAT**(firebase_analytics): add `logInAppPurchase` support for iOS ([#17851](https://github.com/firebase/flutterfire/issues/17851)). ([e54252c0](https://github.com/firebase/flutterfire/commit/e54252c000531a5cd552acb362e3dcc5da7f9bf3))
+
+## 12.0.4
+
+ - Update a dependency to the latest release.
+
+## 12.0.3
+
+ - Update a dependency to the latest release.
+
+## 12.0.2
+
+ - Update a dependency to the latest release.
+
+## 12.0.1
+
+ - Update a dependency to the latest release.
+
+## 12.0.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**: bump iOS SDK to version 12.0.0 ([#17549](https://github.com/firebase/flutterfire/issues/17549)). ([b2619e68](https://github.com/firebase/flutterfire/commit/b2619e685fec897513483df1d7be347b64f95606))
+ - **BREAKING** **FEAT**(analytics): remove deprecated methods for breaking change release ([#17560](https://github.com/firebase/flutterfire/issues/17560)). ([ea3034d8](https://github.com/firebase/flutterfire/commit/ea3034d88215d0b99dda9079fd9134afb5fee496))
+ - **BREAKING** **FEAT**: bump Android SDK to version 34.0.0 ([#17554](https://github.com/firebase/flutterfire/issues/17554)). ([a5bdc051](https://github.com/firebase/flutterfire/commit/a5bdc051d40ee44e39cf0b8d2a7801bc6f618b67))
+
+## 11.6.0
+
+ - **FEAT**(auth,macos): add support for `publish` and `addApplicationDelegate` on macOS FlutterPluginRegistrar ([#17518](https://github.com/firebase/flutterfire/issues/17518)). ([376bb6ea](https://github.com/firebase/flutterfire/commit/376bb6ea8878df3f25cc1416fe26ace2203fd793))
+
 ## 11.5.2
 
  - Update a dependency to the latest release.

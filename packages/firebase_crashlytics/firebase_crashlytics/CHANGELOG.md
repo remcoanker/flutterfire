@@ -1,3 +1,50 @@
+## 5.1.0
+
+ - **FEAT**(ios): migrate iOS to UIScene lifecycle ([#18054](https://github.com/firebase/flutterfire/issues/18054)). ([3ffa4110](https://github.com/firebase/flutterfire/commit/3ffa411098132fd5182a84be4e7a226106bc7451))
+
+## 5.0.8
+
+ - Update a dependency to the latest release.
+
+## 5.0.7
+
+ - Update a dependency to the latest release.
+
+## 5.0.6
+
+ - Update a dependency to the latest release.
+
+## 5.0.5
+
+ - **FIX**(crashlytics,ios): remove warning regarding legacy firebase_app_id_file.json file ([#17852](https://github.com/firebase/flutterfire/issues/17852)). ([fb93470e](https://github.com/firebase/flutterfire/commit/fb93470e13fc7afc40ee310cc85185e89cb63dd0))
+
+## 5.0.4
+
+ - **FIX**(crashlytics,iOS): reorder error reason logging to match Android implementation ([#17713](https://github.com/firebase/flutterfire/issues/17713)). ([0a9cbcef](https://github.com/firebase/flutterfire/commit/0a9cbcefa6d1f7866d63f78523ced3bd98bce03e))
+
+## 5.0.3
+
+ - Update a dependency to the latest release.
+
+## 5.0.2
+
+ - Update a dependency to the latest release.
+
+## 5.0.1
+
+ - Update a dependency to the latest release.
+
+## 5.0.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**: bump iOS SDK to version 12.0.0 ([#17549](https://github.com/firebase/flutterfire/issues/17549)). ([b2619e68](https://github.com/firebase/flutterfire/commit/b2619e685fec897513483df1d7be347b64f95606))
+ - **BREAKING** **FEAT**: bump Android SDK to version 34.0.0 ([#17554](https://github.com/firebase/flutterfire/issues/17554)). ([a5bdc051](https://github.com/firebase/flutterfire/commit/a5bdc051d40ee44e39cf0b8d2a7801bc6f618b67))
+
+## 4.3.10
+
+ - Update a dependency to the latest release.
+
 ## 4.3.9
 
  - Update a dependency to the latest release.

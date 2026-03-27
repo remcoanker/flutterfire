@@ -1,3 +1,45 @@
+## 5.1.0
+
+ - **FEAT**(analytics,iOS): add support for `logTransaction` ([#17995](https://github.com/firebase/flutterfire/issues/17995)). ([103d7ffa](https://github.com/firebase/flutterfire/commit/103d7ffa9343c654ec23c782a802b929dbf37d01))
+
+## 5.0.7
+
+ - Update a dependency to the latest release.
+
+## 5.0.6
+
+ - Update a dependency to the latest release.
+
+## 5.0.5
+
+ - Update a dependency to the latest release.
+
+## 5.0.4
+
+ - Update a dependency to the latest release.
+
+## 5.0.3
+
+ - Update a dependency to the latest release.
+
+## 5.0.2
+
+ - Update a dependency to the latest release.
+
+## 5.0.1
+
+ - Update a dependency to the latest release.
+
+## 5.0.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**(analytics): remove deprecated methods for breaking change release ([#17560](https://github.com/firebase/flutterfire/issues/17560)). ([ea3034d8](https://github.com/firebase/flutterfire/commit/ea3034d88215d0b99dda9079fd9134afb5fee496))
+
+## 4.4.3
+
+ - Update a dependency to the latest release.
+
 ## 4.4.2
 
  - Update a dependency to the latest release.

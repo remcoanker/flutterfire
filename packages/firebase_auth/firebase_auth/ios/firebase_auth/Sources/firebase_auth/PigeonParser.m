@@ -32,12 +32,12 @@
 }
 
 + (PigeonUserInfo *)getPigeonUserInfo:(nonnull FIRUser *)user {
+  NSString *photoUrlString = user.photoURL.absoluteString;
   return [PigeonUserInfo
               makeWithUid:user.uid
                     email:user.email
               displayName:user.displayName
-                 photoUrl:(user.photoURL.absoluteString.length > 0) ? user.photoURL.absoluteString
-                                                                    : nil
+                 photoUrl:(photoUrlString.length > 0) ? photoUrlString : nil
               phoneNumber:user.phoneNumber
               isAnonymous:user.isAnonymous
           isEmailVerified:user.emailVerified
@@ -54,6 +54,7 @@
       [NSMutableArray arrayWithCapacity:providerData.count];
 
   for (id<FIRUserInfo> userInfo in providerData) {
+    NSString *photoUrlStr = userInfo.photoURL.absoluteString;
     NSDictionary *dataDict = @{
       @"providerId" : userInfo.providerID,
       // Can be null on emulator
@@ -61,7 +62,7 @@
       @"displayName" : userInfo.displayName ?: [NSNull null],
       @"email" : userInfo.email ?: [NSNull null],
       @"phoneNumber" : userInfo.phoneNumber ?: [NSNull null],
-      @"photoURL" : userInfo.photoURL.absoluteString ?: [NSNull null],
+      @"photoURL" : photoUrlStr ?: [NSNull null],
       // isAnonymous is always false on in a providerData object (the user is not anonymous)
       @"isAnonymous" : @NO,
       // isEmailVerified is always true on in a providerData object (the email is verified by the
@@ -82,7 +83,6 @@
                                              profile:userInfo.profile];
 }
 
-#if TARGET_OS_IPHONE
 + (PigeonTotpSecret *)getPigeonTotpSecret:(FIRTOTPSecret *)secret {
   return [PigeonTotpSecret makeWithCodeIntervalSeconds:nil
                                             codeLength:nil
@@ -90,7 +90,6 @@
                                       hashingAlgorithm:nil
                                              secretKey:secret.sharedSecretKey];
 }
-#endif
 
 + (PigeonAuthCredential *)getPigeonAuthCredential:(FIRAuthCredential *)authCredential
                                             token:(NSNumber *_Nullable)token {
@@ -127,10 +126,6 @@
 
   if (settings.url != nil) {
     codeSettings.URL = [NSURL URLWithString:settings.url];
-  }
-
-  if (settings.dynamicLinkDomain != nil) {
-    codeSettings.dynamicLinkDomain = settings.dynamicLinkDomain;
   }
 
   if (settings.linkDomain != nil) {

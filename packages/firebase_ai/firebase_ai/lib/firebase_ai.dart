@@ -22,6 +22,8 @@ export 'src/api.dart'
         FinishReason,
         GenerateContentResponse,
         GenerationConfig,
+        ThinkingConfig,
+        ThinkingLevel,
         HarmBlockThreshold,
         HarmCategory,
         HarmProbability,
@@ -32,7 +34,12 @@ export 'src/api.dart'
         SafetySetting,
         UsageMetadata;
 export 'src/base_model.dart'
-    show GenerativeModel, ImagenModel, LiveGenerativeModel;
+    show
+        GenerativeModel,
+        ImagenModel,
+        LiveGenerativeModel,
+        TemplateGenerativeModel,
+        TemplateImagenModel;
 export 'src/chat.dart' show ChatSession, StartChatExtension;
 export 'src/content.dart'
     show
@@ -42,16 +49,21 @@ export 'src/content.dart'
         FunctionCall,
         FunctionResponse,
         Part,
-        TextPart;
+        TextPart,
+        ExecutableCodePart,
+        CodeExecutionResultPart,
+        UnknownPart;
 export 'src/error.dart'
     show
         FirebaseAIException,
         FirebaseAISdkException,
         InvalidApiKey,
         ServerException,
+        ServiceApiNotEnabled,
+        QuotaExceeded,
         UnsupportedUserLocation;
 export 'src/firebase_ai.dart' show FirebaseAI;
-export 'src/imagen_api.dart'
+export 'src/imagen/imagen_api.dart'
     show
         ImagenSafetySettings,
         ImagenFormat,
@@ -59,22 +71,55 @@ export 'src/imagen_api.dart'
         ImagenPersonFilterLevel,
         ImagenGenerationConfig,
         ImagenAspectRatio;
-export 'src/imagen_content.dart' show ImagenInlineImage;
+export 'src/imagen/imagen_content.dart' show ImagenInlineImage;
+export 'src/imagen/imagen_edit.dart'
+    show
+        ImagenEditMode,
+        ImagenSubjectReferenceType,
+        ImagenControlType,
+        ImagenMaskMode,
+        ImagenMaskConfig,
+        ImagenSubjectConfig,
+        ImagenStyleConfig,
+        ImagenControlConfig,
+        ImagenEditingConfig,
+        ImagenDimensions,
+        ImagenImagePlacement;
+export 'src/imagen/imagen_reference.dart'
+    show
+        ImagenReferenceImage,
+        ImagenMaskReference,
+        ImagenRawImage,
+        ImagenRawMask,
+        ImagenSemanticMask,
+        ImagenBackgroundMask,
+        ImagenForegroundMask,
+        ImagenSubjectReference,
+        ImagenStyleReference,
+        ImagenControlReference;
 export 'src/live_api.dart'
     show
         LiveGenerationConfig,
         SpeechConfig,
+        AudioTranscriptionConfig,
         LiveServerMessage,
         LiveServerContent,
         LiveServerToolCall,
         LiveServerToolCallCancellation,
-        LiveServerResponse;
+        LiveServerResponse,
+        GoingAwayNotice,
+        Transcription;
 export 'src/live_session.dart' show LiveSession;
-export 'src/schema.dart' show Schema, SchemaType;
+export 'src/schema.dart' show JSONSchema, Schema, SchemaType;
+
 export 'src/tool.dart'
     show
+        AutoFunctionDeclaration,
         FunctionCallingConfig,
         FunctionCallingMode,
         FunctionDeclaration,
         Tool,
-        ToolConfig;
+        ToolConfig,
+        GoogleSearch,
+        CodeExecution,
+        UrlContext;

@@ -1,3 +1,43 @@
+## 3.8.19
+
+ - Update a dependency to the latest release.
+
+## 3.8.18
+
+ - Update a dependency to the latest release.
+
+## 3.8.17
+
+ - Update a dependency to the latest release.
+
+## 3.8.16
+
+ - Update a dependency to the latest release.
+
+## 3.8.15
+
+ - Update a dependency to the latest release.
+
+## 3.8.14
+
+ - Update a dependency to the latest release.
+
+## 3.8.13
+
+ - Update a dependency to the latest release.
+
+## 3.8.12
+
+ - Update a dependency to the latest release.
+
+## 3.8.11
+
+ - Update a dependency to the latest release.
+
+## 3.8.10
+
+ - Update a dependency to the latest release.
+
 ## 3.8.9
 
  - Update a dependency to the latest release.

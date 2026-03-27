@@ -14,9 +14,12 @@
 
 import 'package:firebase_ai/src/base_model.dart';
 import 'package:firebase_ai/src/client.dart';
+import 'package:firebase_ai/src/platform_header_helper.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -45,6 +48,10 @@ class MockFirebaseAppCheck extends Mock implements FirebaseAppCheck {
   @override
   Future<String?> getToken([bool? forceRefresh = false]) async =>
       super.noSuchMethod(Invocation.method(#getToken, [forceRefresh]));
+
+  @override
+  Future<String> getLimitedUseToken() async =>
+      super.noSuchMethod(Invocation.method(#getLimitedUseToken, [])) ?? '';
 }
 
 // Mock Firebase Auth
@@ -70,9 +77,13 @@ class MockApiClient extends Mock implements ApiClient {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('BaseModel', () {
+    setUp(clearPlatformSecurityHeadersCache);
+
     test('firebaseTokens returns a function that generates headers', () async {
-      final tokenFunction = BaseModel.firebaseTokens(null, null, null);
+      final tokenFunction = BaseModel.firebaseTokens(null, null, null, false);
       final headers = await tokenFunction();
       expect(headers['x-goog-api-client'], contains('gl-dart'));
       expect(headers['x-goog-api-client'], contains('fire'));
@@ -83,7 +94,8 @@ void main() {
       final mockAppCheck = MockFirebaseAppCheck();
       when(mockAppCheck.getToken())
           .thenAnswer((_) async => 'test-app-check-token');
-      final tokenFunction = BaseModel.firebaseTokens(mockAppCheck, null, null);
+      final tokenFunction =
+          BaseModel.firebaseTokens(mockAppCheck, null, null, false);
       final headers = await tokenFunction();
       expect(headers['X-Firebase-AppCheck'], 'test-app-check-token');
       expect(headers['x-goog-api-client'], contains('gl-dart'));
@@ -96,7 +108,8 @@ void main() {
       final mockUser = MockUser();
       when(mockUser.getIdToken()).thenAnswer((_) async => 'test-id-token');
       when(mockAuth.currentUser).thenReturn(mockUser);
-      final tokenFunction = BaseModel.firebaseTokens(null, mockAuth, null);
+      final tokenFunction =
+          BaseModel.firebaseTokens(null, mockAuth, null, false);
       final headers = await tokenFunction();
       expect(headers['Authorization'], 'Firebase test-id-token');
       expect(headers['x-goog-api-client'], contains('gl-dart'));
@@ -109,7 +122,8 @@ void main() {
         () async {
       final mockApp = MockFirebaseApp();
 
-      final tokenFunction = BaseModel.firebaseTokens(null, null, mockApp);
+      final tokenFunction =
+          BaseModel.firebaseTokens(null, null, mockApp, false);
       final headers = await tokenFunction();
       expect(headers['X-Firebase-AppId'], 'test-app-id');
       expect(headers['x-goog-api-client'], contains('gl-dart'));
@@ -128,7 +142,7 @@ void main() {
       final mockApp = MockFirebaseApp();
 
       final tokenFunction =
-          BaseModel.firebaseTokens(mockAppCheck, mockAuth, mockApp);
+          BaseModel.firebaseTokens(mockAppCheck, mockAuth, mockApp, false);
       final headers = await tokenFunction();
       expect(headers['X-Firebase-AppCheck'], 'test-app-check-token');
       expect(headers['Authorization'], 'Firebase test-id-token');
@@ -136,6 +150,74 @@ void main() {
       expect(headers['x-goog-api-client'], contains('gl-dart'));
       expect(headers['x-goog-api-client'], contains('fire'));
       expect(headers.length, 4);
+    });
+
+    test('firebaseTokens includes limited use App Check token if specified',
+        () async {
+      final mockAppCheck = MockFirebaseAppCheck();
+      when(mockAppCheck.getLimitedUseToken())
+          .thenAnswer((_) async => 'test-limited-use-app-check-token');
+      final tokenFunction =
+          BaseModel.firebaseTokens(mockAppCheck, null, null, true);
+      final headers = await tokenFunction();
+      expect(
+          headers['X-Firebase-AppCheck'], 'test-limited-use-app-check-token');
+      expect(headers['x-goog-api-client'], contains('gl-dart'));
+      expect(headers['x-goog-api-client'], contains('fire'));
+      expect(headers.length, 2);
+    });
+
+    test('firebaseTokens includes Android platform headers when available',
+        () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      addTearDown(() {
+        debugDefaultTargetPlatformOverride = null;
+      });
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(platformHeaderChannel,
+              (MethodCall methodCall) async {
+        return <String, String>{
+          'X-Android-Package': 'com.example.test',
+          'X-Android-Cert': 'AABBCCDD',
+        };
+      });
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(platformHeaderChannel, null);
+      });
+
+      final tokenFunction = BaseModel.firebaseTokens(null, null, null, false);
+      final headers = await tokenFunction();
+      expect(headers['X-Android-Package'], 'com.example.test');
+      expect(headers['X-Android-Cert'], 'AABBCCDD');
+      expect(headers['x-goog-api-client'], contains('gl-dart'));
+      expect(headers.length, 3);
+    });
+
+    test('firebaseTokens includes iOS bundle identifier when available',
+        () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(platformHeaderChannel,
+              (MethodCall methodCall) async {
+        return <String, String>{
+          'x-ios-bundle-identifier': 'com.example.iosapp',
+        };
+      });
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(platformHeaderChannel, null);
+      });
+
+      final mockApp = MockFirebaseApp();
+
+      final tokenFunction =
+          BaseModel.firebaseTokens(null, null, mockApp, false);
+      final headers = await tokenFunction();
+      expect(headers['x-ios-bundle-identifier'], 'com.example.iosapp');
+      expect(headers['X-Firebase-AppId'], 'test-app-id');
+      expect(headers['x-goog-api-client'], contains('gl-dart'));
+      expect(headers.length, 3);
     });
   });
 }
