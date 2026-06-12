@@ -114,13 +114,19 @@ class FirebaseMessaging extends FirebasePluginPlatform {
   /// Returns the default FCM token for this device.
   ///
   /// On web, a [vapidKey] is required.
+  ///
+  /// On web, a custom messaging service worker can be registered with
+  /// [serviceWorkerScriptPath]. This must point to a JavaScript file in the
+  /// root of the app's `web` directory.
   Future<String?> getToken({
     String? vapidKey,
+    String? serviceWorkerScriptPath,
     Object? serviceWorkerRegistration,
   }) {
     return _delegate.getToken(
       vapidKey: vapidKey,
       serviceWorkerRegistration: serviceWorkerRegistration,
+      serviceWorkerScriptPath: serviceWorkerScriptPath,
     );
   }
 

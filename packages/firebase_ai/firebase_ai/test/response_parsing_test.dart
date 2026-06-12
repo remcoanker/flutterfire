@@ -1115,6 +1115,187 @@ void main() {
       expect(urlContextMetadata.urlMetadata[0].urlRetrievalStatus,
           UrlRetrievalStatus.error);
     });
+
+    test('parses json with google maps grounding chunk', () {
+      final jsonResponse = {
+        'candidates': [
+          {
+            'content': {
+              'parts': [
+                {'text': 'This is a maps response.'}
+              ]
+            },
+            'finishReason': 'STOP',
+            'groundingMetadata': {
+              'groundingChunks': [
+                {
+                  'maps': {
+                    'uri': 'https://maps.google.com/?cid=123',
+                    'title': 'Google HQ',
+                    'placeId': 'ChIJS5dFe_cZzosR26ZvwqWaMAM',
+                  }
+                }
+              ],
+            }
+          }
+        ]
+      };
+
+      final response =
+          VertexSerialization().parseGenerateContentResponse(jsonResponse);
+      final groundingMetadata = response.candidates.first.groundingMetadata;
+
+      expect(groundingMetadata, isNotNull);
+      final groundingChunk = groundingMetadata!.groundingChunks.first;
+      expect(groundingChunk.maps?.uri, 'https://maps.google.com/?cid=123');
+      expect(groundingChunk.maps?.title, 'Google HQ');
+      expect(groundingChunk.maps?.placeId, 'ChIJS5dFe_cZzosR26ZvwqWaMAM');
+      expect(groundingChunk.web, isNull);
+    });
+
+    test('with unknown safety ratings', () async {
+      const response = '''
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Some text"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0,
+      "safetyRatings": [
+        {
+          "category": "HARM_CATEGORY_HARASSMENT",
+          "probability": "MEDIUM"
+        },
+        {
+          "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+          "probability": "FAKE_NEW_HARM_PROBABILITY"
+        },
+        {
+          "category": "FAKE_NEW_HARM_CATEGORY",
+          "probability": "HIGH"
+        }
+      ]
+    }
+  ],
+  "promptFeedback": {
+    "safetyRatings": [
+      {
+        "category": "HARM_CATEGORY_HARASSMENT",
+        "probability": "MEDIUM"
+      },
+      {
+        "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+        "probability": "FAKE_NEW_HARM_PROBABILITY"
+      },
+      {
+        "category": "FAKE_NEW_HARM_CATEGORY",
+        "probability": "HIGH"
+      }
+    ]
+  }
+}
+''';
+      final decoded = jsonDecode(response) as Object;
+      final generateContentResponse =
+          VertexSerialization().parseGenerateContentResponse(decoded);
+      expect(
+        generateContentResponse,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content.model([
+                  const TextPart('Some text'),
+                ]),
+                [
+                  SafetyRating(
+                    HarmCategory.harassment,
+                    HarmProbability.medium,
+                  ),
+                  SafetyRating(
+                    HarmCategory.dangerousContent,
+                    HarmProbability.unknown,
+                  ),
+                  SafetyRating(
+                    HarmCategory.unknown,
+                    HarmProbability.high,
+                  ),
+                ],
+                null,
+                FinishReason.stop,
+                null,
+              ),
+            ],
+            PromptFeedback(null, null, [
+              SafetyRating(
+                HarmCategory.harassment,
+                HarmProbability.medium,
+              ),
+              SafetyRating(
+                HarmCategory.dangerousContent,
+                HarmProbability.unknown,
+              ),
+              SafetyRating(
+                HarmCategory.unknown,
+                HarmProbability.high,
+              ),
+            ]),
+          ),
+        ),
+      );
+    });
+
+    test('with an empty function call', () async {
+      const response = '''
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "current_time"
+            }
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ]
+}
+''';
+      final decoded = jsonDecode(response) as Object;
+      final generateContentResponse =
+          VertexSerialization().parseGenerateContentResponse(decoded);
+      expect(
+        generateContentResponse,
+        matchesGenerateContentResponse(
+          GenerateContentResponse(
+            [
+              Candidate(
+                Content.model([
+                  const FunctionCall('current_time', {}),
+                ]),
+                null,
+                null,
+                FinishReason.stop,
+                null,
+              ),
+            ],
+            null,
+          ),
+        ),
+      );
+    });
   });
 
   group('parses and throws error responses', () {

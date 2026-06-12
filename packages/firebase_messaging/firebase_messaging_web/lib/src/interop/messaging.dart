@@ -10,7 +10,6 @@ import 'dart:js_interop';
 
 import 'package:firebase_core_web/firebase_core_web_interop.dart';
 import 'package:web/web.dart' as web;
-
 import 'messaging_interop.dart' as messaging_interop;
 
 export 'messaging_interop.dart';
@@ -44,16 +43,23 @@ class Messaging extends JsObjectWrapper<messaging_interop.MessagingJsImpl> {
 
   /// After calling [requestPermission] you can call this method to get an FCM registration token
   /// that can be used to send push messages to this user.
-  Future<String> getToken({String? vapidKey, web.ServiceWorkerRegistration? serviceWorkerRegistration}) async {
+  Future<String> getToken(
+      {String? vapidKey, String? serviceWorkerScriptPath, web.ServiceWorkerRegistration? serviceWorkerRegistration}) async {
     try {
+      if (serviceWorkerRegistration == null && serviceWorkerScriptPath != null) {
+        serviceWorkerRegistration = await web.window.navigator.serviceWorker
+            .register(serviceWorkerScriptPath.toJS)
+            .toDart;
+      }
       final token = (await messaging_interop
               .getToken(
                   jsObject,
-                  vapidKey == null
+                  vapidKey == null && serviceWorkerRegistration == null
                       ? null
                       : messaging_interop.GetTokenOptions(
-                          vapidKey: vapidKey.toJS,
-                          serviceWorkerRegistration: serviceWorkerRegistration))
+                          vapidKey: vapidKey?.toJS,
+                          serviceWorkerRegistration: serviceWorkerRegistration,
+                        ))
               .toDart)
           .toDart;
       return token;
@@ -64,7 +70,10 @@ class Messaging extends JsObjectWrapper<messaging_interop.MessagingJsImpl> {
       if (err.toString().toLowerCase().contains('no active service worker') &&
           firstGetTokenCall) {
         firstGetTokenCall = false;
-        return getToken(vapidKey: vapidKey);
+        return getToken(
+          vapidKey: vapidKey,
+          serviceWorkerScriptPath: serviceWorkerScriptPath,
+        );
       }
       rethrow;
     }

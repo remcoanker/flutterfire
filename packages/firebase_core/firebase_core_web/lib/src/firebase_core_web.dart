@@ -214,6 +214,17 @@ class FirebaseCoreWeb extends FirebasePlatform {
           return Future.value();
         }
 
+        const firestoreServiceName = 'firestore';
+
+        if (service.name == firestoreServiceName) {
+          // Inject the Firestore Pipelines script. This bundle supports both
+          // Pipeline operations (Enterprise edition) and standard Firestore queries.
+          return injectSrcScript(
+            'https://www.gstatic.com/firebasejs/$version/firebase-firestore-pipelines.js',
+            'firebase_$firestoreServiceName',
+          );
+        }
+
         return injectSrcScript(
           'https://www.gstatic.com/firebasejs/$version/firebase-${service.name}.js',
           'firebase_${service.override ?? service.name}',
@@ -323,6 +334,7 @@ class FirebaseCoreWeb extends FirebasePlatform {
 
         // At this point, there is no default app so we need to create it with
         // the users options.
+        // TODO(recaptchaSiteKey): Pass recaptchaSiteKey if supported.
         app = firebase.initializeApp(
           apiKey: options!.apiKey,
           authDomain: options.authDomain,
@@ -344,6 +356,7 @@ class FirebaseCoreWeb extends FirebasePlatform {
       );
 
       try {
+        // TODO(recaptchaSiteKey): Pass recaptchaSiteKey if supported.
         app = firebase.initializeApp(
           name: name,
           apiKey: options!.apiKey,

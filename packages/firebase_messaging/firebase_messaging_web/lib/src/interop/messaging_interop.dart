@@ -9,6 +9,7 @@
 library;
 
 import 'dart:js_interop';
+import 'package:web/web.dart' as web;
 
 import 'package:firebase_core_web/firebase_core_web_interop.dart';
 import 'package:web/web.dart' as web;
@@ -50,9 +51,11 @@ extension type GetTokenOptions._(JSObject _) implements JSObject {
   // external String get serviceWorkerRegistration
   external factory GetTokenOptions({
     JSString? vapidKey,
-    web.ServiceWorkerRegistration? serviceWorkerRegistration
+    /*dynamic serviceWorkerRegistration */
+    web.ServiceWorkerRegistration? serviceWorkerRegistration,
   });
   external JSString get vapidKey;
+  external web.ServiceWorkerRegistration get serviceWorkerRegistration;
 }
 
 extension type NotificationPayloadJsImpl._(JSObject _) implements JSObject {

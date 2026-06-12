@@ -7,19 +7,18 @@
 
 import PackageDescription
 
-let library_version = "0.4.1-5"
-let firebase_sdk_version: Version = "12.9.0"
+let firebaseSdkVersion: Version = "12.14.0"
 
 let package = Package(
   name: "firebase_app_check",
   platforms: [
-    .macOS("10.15"),
+    .macOS("10.15")
   ],
   products: [
-    .library(name: "firebase-app-check", targets: ["firebase_app_check"]),
+    .library(name: "firebase-app-check", targets: ["firebase_app_check"])
   ],
   dependencies: [
-    .package(url: "https://github.com/firebase/firebase-ios-sdk", from: firebase_sdk_version),
+    .package(url: "https://github.com/firebase/firebase-ios-sdk", exact: firebaseSdkVersion),
     .package(name: "firebase_core", path: "../firebase_core"),
   ],
   targets: [
@@ -30,13 +29,8 @@ let package = Package(
         .product(name: "firebase-core", package: "firebase_core"),
       ],
       resources: [
-        .process("Resources"),
-      ],
-      cSettings: [
-        .headerSearchPath("include"),
-        .define("LIBRARY_VERSION", to: "\"\(library_version)\""),
-        .define("LIBRARY_NAME", to: "\"flutter-fire-appcheck\""),
+        .process("Resources")
       ]
-    ),
+    )
   ]
 )

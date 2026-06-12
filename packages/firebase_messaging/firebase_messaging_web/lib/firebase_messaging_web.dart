@@ -112,7 +112,8 @@ class FirebaseMessagingWeb extends FirebaseMessagingPlatform {
   }
 
   @override
-  Future<String?> getToken({String? vapidKey, Object? serviceWorkerRegistration}) async {
+  Future<String?> getToken(
+      {String? vapidKey, String? serviceWorkerScriptPath, Object? serviceWorkerRegistration}) async {
     assert(serviceWorkerRegistration is web.ServiceWorkerRegistration);
     _delegate;
 
@@ -122,7 +123,8 @@ class FirebaseMessagingWeb extends FirebaseMessagingPlatform {
     }
 
     return convertWebExceptions(
-      () => _delegate.getToken(vapidKey: vapidKey, serviceWorkerRegistration: serviceWorkerRegistration as web.ServiceWorkerRegistration?),
+      () => _delegate.getToken(
+          vapidKey: vapidKey, serviceWorkerScriptPath: serviceWorkerScriptPath, serviceWorkerRegistration: serviceWorkerRegistration as web.ServiceWorkerRegistration?),
     );
   }
 

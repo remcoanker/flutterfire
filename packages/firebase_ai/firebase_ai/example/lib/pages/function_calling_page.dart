@@ -14,7 +14,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_ai/firebase_ai.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
+import '../utils/function_call_utils.dart';
 import '../widgets/message_widget.dart';
 
 class FunctionCallingPage extends StatefulWidget {
@@ -29,13 +30,6 @@ class FunctionCallingPage extends StatefulWidget {
 
   @override
   State<FunctionCallingPage> createState() => _FunctionCallingPageState();
-}
-
-class Location {
-  final String city;
-  final String state;
-
-  Location(this.city, this.state);
 }
 
 class _FunctionCallingPageState extends State<FunctionCallingPage> {
@@ -80,7 +74,7 @@ class _FunctionCallingPageState extends State<FunctionCallingPage> {
               'The date for which to get the weather. Date must be in the format: YYYY-MM-DD.',
         ),
       },
-      callable: _fetchWeatherCallable,
+      callable: fetchWeatherCallable,
     );
     _autoFindRestaurantsTool = AutoFunctionDeclaration(
       name: 'findRestaurants',
@@ -231,16 +225,6 @@ class _FunctionCallingPageState extends State<FunctionCallingPage> {
     };
   }
 
-  Future<Map<String, Object?>> _fetchWeatherCallable(
-    Map<String, Object?> args,
-  ) async {
-    final locationData = args['location']! as Map<String, Object?>;
-    final city = locationData['city']! as String;
-    final state = locationData['state']! as String;
-    final date = args['date']! as String;
-    return fetchWeather(Location(city, state), date);
-  }
-
   void _initializeModel() {
     final generationConfig = GenerationConfig(
       thinkingConfig: _enableThinking
@@ -252,25 +236,25 @@ class _FunctionCallingPageState extends State<FunctionCallingPage> {
     );
 
     final aiClient = widget.useVertexBackend
-        ? FirebaseAI.vertexAI(auth: FirebaseAuth.instance)
-        : FirebaseAI.googleAI(auth: FirebaseAuth.instance);
+        ? FirebaseAI.vertexAI(location: 'global')
+        : FirebaseAI.googleAI();
 
     _functionCallModel = aiClient.generativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: generationConfig,
       tools: [
         Tool.functionDeclarations([fetchWeatherTool]),
       ],
     );
     _autoFunctionCallModel = aiClient.generativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: generationConfig,
       tools: [
         Tool.functionDeclarations([_autoFetchWeatherTool]),
       ],
     );
     _parallelAutoFunctionCallModel = aiClient.generativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: generationConfig,
       tools: [
         Tool.functionDeclarations(
@@ -279,43 +263,26 @@ class _FunctionCallingPageState extends State<FunctionCallingPage> {
       ],
     );
     _codeExecutionModel = aiClient.generativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: generationConfig,
       tools: [
         Tool.codeExecution(),
       ],
     );
     _complexSchemaModel = aiClient.generativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: generationConfig,
       tools: [
         Tool.functionDeclarations([_autoPlanVacationTool]),
       ],
     );
     _refDefJsonSchemaModel = aiClient.generativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: generationConfig,
       tools: [
         Tool.functionDeclarations([_autoProcessTransactionTool]),
       ],
     );
-  }
-
-  // This is a hypothetical API to return a fake weather data collection for
-  // certain location
-  Future<Map<String, Object?>> fetchWeather(
-    Location location,
-    String date,
-  ) async {
-    // TODO(developer): Call a real weather API.
-    // Mock response from the API. In developer live code this would call the
-    // external API and return what that API returns.
-    final apiResponse = {
-      'temperature': 38,
-      'chancePrecipitation': '56%',
-      'cloudConditions': 'partly-cloudy',
-    };
-    return apiResponse;
   }
 
   /// Actual function to demonstrate the function calling feature.
