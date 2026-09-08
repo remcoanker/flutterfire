@@ -43,23 +43,26 @@ class Messaging extends JsObjectWrapper<messaging_interop.MessagingJsImpl> {
 
   /// After calling [requestPermission] you can call this method to get an FCM registration token
   /// that can be used to send push messages to this user.
-  Future<String> getToken(
-      {String? vapidKey, String? serviceWorkerScriptPath}) async {
+  Future<String> getToken({
+    String? vapidKey,
+    String? serviceWorkerScriptPath,
+    web.ServiceWorkerRegistration? serviceWorkerRegistration,
+  }) async {
     try {
-      web.ServiceWorkerRegistration? serviceWorkerRegistration;
-      if (serviceWorkerScriptPath != null) {
-        serviceWorkerRegistration = await web.window.navigator.serviceWorker
+      var registration = serviceWorkerRegistration;
+      if (registration == null && serviceWorkerScriptPath != null) {
+        registration = await web.window.navigator.serviceWorker
             .register(serviceWorkerScriptPath.toJS)
             .toDart;
       }
       final token = (await messaging_interop
               .getToken(
                   jsObject,
-                  vapidKey == null && serviceWorkerRegistration == null
+                  vapidKey == null && registration == null
                       ? null
                       : messaging_interop.GetTokenOptions(
                           vapidKey: vapidKey?.toJS,
-                          serviceWorkerRegistration: serviceWorkerRegistration,
+                          serviceWorkerRegistration: registration,
                         ))
               .toDart)
           .toDart;

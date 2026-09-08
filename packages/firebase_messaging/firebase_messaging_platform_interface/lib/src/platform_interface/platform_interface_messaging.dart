@@ -174,6 +174,8 @@ abstract class FirebaseMessagingPlatform extends PlatformInterface {
   Future<String?> getToken({
     String? vapidKey,
     String? serviceWorkerScriptPath,
+    // Should always be a ServiceWorkerRegistration
+    Object? serviceWorkerRegistration,
   }) {
     throw UnimplementedError('getToken() is not implemented');
   }

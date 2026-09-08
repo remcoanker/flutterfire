@@ -112,8 +112,14 @@ class FirebaseMessagingWeb extends FirebaseMessagingPlatform {
   }
 
   @override
-  Future<String?> getToken(
-      {String? vapidKey, String? serviceWorkerScriptPath}) async {
+  Future<String?> getToken({
+    String? vapidKey,
+    String? serviceWorkerScriptPath,
+    Object? serviceWorkerRegistration,
+  }) async {
+    assert(serviceWorkerRegistration == null ||
+        // ignore: invalid_runtime_check_with_js_interop_types
+        serviceWorkerRegistration is web.ServiceWorkerRegistration);
     _delegate;
 
     if (!_initialized) {
@@ -123,7 +129,11 @@ class FirebaseMessagingWeb extends FirebaseMessagingPlatform {
 
     return convertWebExceptions(
       () => _delegate.getToken(
-          vapidKey: vapidKey, serviceWorkerScriptPath: serviceWorkerScriptPath),
+        vapidKey: vapidKey,
+        serviceWorkerScriptPath: serviceWorkerScriptPath,
+        serviceWorkerRegistration:
+            serviceWorkerRegistration as web.ServiceWorkerRegistration?,
+      ),
     );
   }
 

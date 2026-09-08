@@ -121,10 +121,12 @@ class FirebaseMessaging extends FirebasePlugin {
   Future<String?> getToken({
     String? vapidKey,
     String? serviceWorkerScriptPath,
+    Object? serviceWorkerRegistration,
   }) {
     return _delegate.getToken(
       vapidKey: vapidKey,
       serviceWorkerScriptPath: serviceWorkerScriptPath,
+      serviceWorkerRegistration: serviceWorkerRegistration,
     );
   }
 

@@ -96,11 +96,16 @@ class MockFirebaseMessaging extends Mock
   }
 
   @override
-  Future<String> getToken({String? vapidKey, String? serviceWorkerScriptPath}) {
+  Future<String> getToken({
+    String? vapidKey,
+    String? serviceWorkerScriptPath,
+    Object? serviceWorkerRegistration,
+  }) {
     return super.noSuchMethod(
         Invocation.method(#getToken, [], {
           #vapidKey: vapidKey,
-          #serviceWorkerScriptPath: serviceWorkerScriptPath
+          #serviceWorkerScriptPath: serviceWorkerScriptPath,
+          #serviceWorkerRegistration: serviceWorkerRegistration
         }),
         returnValue: Future<String>.value(''),
         returnValueForMissingStub: Future<String>.value(''));
